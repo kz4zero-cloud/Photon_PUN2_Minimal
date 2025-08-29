@@ -1,0 +1,229 @@
+using UnityEngine;
+using UnityEngine.UI;
+using Photon.Pun;
+using Photon.Realtime;
+using TMPro;
+
+public class PunLobbyUI : MonoBehaviourPunCallbacks
+{
+    [Header("UI (どちらか埋まっていればOK)")]
+    [SerializeField] TMP_InputField nicknameTMP;
+    [SerializeField] TMP_InputField roomTMP;
+    [SerializeField] TMP_Text statusTMP;
+
+    [Space(6)]
+    [SerializeField] InputField nicknameUGUI;
+    [SerializeField] InputField roomUGUI;
+    [SerializeField] Text statusUGUI;
+
+    [Header("Buttons (未設定でも自動配線)")]
+    [SerializeField] Button joinByNameButton;
+    [SerializeField] Button joinRandomButton;
+    [SerializeField] Button startSoloButton; // 使わないなら空でOK
+
+    const string KEY_NICK = "last_nickname";
+    const string KEY_ROOM = "last_roomname";
+    const int MAX_PLAYERS = 8;
+
+    void Awake()
+    {
+        AutoWire(ref nicknameTMP, "NicknameInput");
+        AutoWire(ref roomTMP, "RoomInput");
+        AutoWire(ref statusTMP, "StatusText");
+
+        AutoWire(ref nicknameUGUI, "NicknameInput");
+        AutoWire(ref roomUGUI, "RoomInput");
+        AutoWire(ref statusUGUI, "StatusText");
+
+        AutoWire(ref joinByNameButton, "ButtonJoinByName");
+        AutoWire(ref joinRandomButton, "ButtonJoinRandom");
+        AutoWire(ref startSoloButton, "ButtonStartSolo");
+
+        if (nicknameTMP) { nicknameTMP.onEndEdit.RemoveAllListeners(); nicknameTMP.onEndEdit.AddListener(_ => SavePrefs()); }
+        if (roomTMP) { roomTMP.onEndEdit.RemoveAllListeners(); roomTMP.onEndEdit.AddListener(_ => SavePrefs()); }
+        if (nicknameUGUI) { nicknameUGUI.onEndEdit.RemoveAllListeners(); nicknameUGUI.onEndEdit.AddListener(_ => SavePrefs()); }
+        if (roomUGUI) { roomUGUI.onEndEdit.RemoveAllListeners(); roomUGUI.onEndEdit.AddListener(_ => SavePrefs()); }
+
+        if (joinByNameButton) { joinByNameButton.onClick.RemoveAllListeners(); joinByNameButton.onClick.AddListener(JoinByName); }
+        if (joinRandomButton) { joinRandomButton.onClick.RemoveAllListeners(); joinRandomButton.onClick.AddListener(JoinRandom); }
+        if (startSoloButton) { startSoloButton.onClick.RemoveAllListeners(); startSoloButton.onClick.AddListener(StartSolo); }
+
+        LoadPrefs();
+    }
+
+    void Start()
+    {
+        PhotonNetwork.AutomaticallySyncScene = true;
+
+        if (!PhotonNetwork.IsConnected)
+        {
+            SetStatus("Connecting...");
+            SetButtons(false);
+            PhotonNetwork.ConnectUsingSettings();
+            return;
+        }
+
+        if (PhotonNetwork.InRoom)
+        {
+            SetStatus("Already in a room. Please return to Lobby.");
+            SetButtons(false);
+            return;
+        }
+
+        if (PhotonNetwork.InLobby)
+        {
+            SetStatus("In lobby. Enter a room name or Join Random.");
+            SetButtons(true);
+            return;
+        }
+
+        if (PhotonNetwork.IsConnectedAndReady && !PhotonNetwork.InLobby)
+        {
+            SetStatus("Connected. Joining lobby...");
+            SetButtons(false);
+            PhotonNetwork.JoinLobby();
+            return;
+        }
+
+        SetStatus("Still connecting... please wait.");
+        SetButtons(false);
+    }
+
+    // ----- Buttons -----
+    void JoinByName()
+    {
+        if (!CanMatchmakeNow()) return;
+        var room = GetRoomText().Trim();
+        if (string.IsNullOrEmpty(room)) { SetStatus("Enter room name first."); return; }
+
+        PhotonNetwork.NickName = GetNickOrDefault();
+        SavePrefs();
+
+        SetStatus($"Joining/Creating '{room}'...");
+        SetButtons(false);
+        PhotonNetwork.JoinOrCreateRoom(room, new RoomOptions { MaxPlayers = MAX_PLAYERS }, TypedLobby.Default);
+    }
+
+    void JoinRandom()
+    {
+        if (!CanMatchmakeNow()) return;
+        PhotonNetwork.NickName = GetNickOrDefault();
+        SavePrefs();
+
+        SetStatus("Joining random room...");
+        SetButtons(false);
+        PhotonNetwork.JoinRandomRoom();
+    }
+
+    void StartSolo()
+    {
+        if (PhotonNetwork.InRoom) { SetStatus("Already in a room. Leave first."); return; }
+        PhotonNetwork.NickName = GetNickOrDefault();
+        SavePrefs();
+        SetStatus("Starting SOLO...");
+        PunSolo.StartSolo(3);
+    }
+
+    // ----- PUN callbacks -----
+    public override void OnConnectedToMaster()
+    {
+        SetStatus("Connected. Joining lobby...");
+        SetButtons(false);
+        PhotonNetwork.JoinLobby();
+    }
+
+    public override void OnJoinedLobby()
+    {
+        SetStatus("In lobby. Enter a room name or Join Random.");
+        SetButtons(true);
+    }
+
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        var fallback = string.IsNullOrWhiteSpace(GetRoomText()) ? "Room" + Random.Range(1000, 9999) : GetRoomText();
+        SetStatus($"Join Random failed: {message} → creating '{fallback}'...");
+        PhotonNetwork.CreateRoom(fallback, new RoomOptions { MaxPlayers = MAX_PLAYERS });
+    }
+
+    public override void OnJoinedRoom()
+    {
+        SetStatus("Joined: " + (PhotonNetwork.CurrentRoom?.Name ?? "(null)"));
+        SetButtons(false);
+
+        // ★PUNのシーン同期を使う（ここが修正点）
+        PhotonNetwork.LoadLevel("Main");
+    }
+
+    public override void OnLeftRoom()
+    {
+        if (PhotonNetwork.IsConnectedAndReady) PhotonNetwork.JoinLobby();
+        else SetButtons(false);
+    }
+
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        SetStatus("Disconnected: " + cause);
+        SetButtons(false);
+    }
+
+    // ----- helpers -----
+    bool CanMatchmakeNow()
+    {
+        if (!PhotonNetwork.IsConnected) { SetStatus("Not connected. Connecting..."); PhotonNetwork.ConnectUsingSettings(); return false; }
+        if (PhotonNetwork.InRoom) { SetStatus("Already in a room. Please return to Lobby."); return false; }
+        if (PhotonNetwork.InLobby || PhotonNetwork.IsConnectedAndReady) return true;
+        SetStatus("Still connecting... please wait."); return false;
+    }
+
+    void SetButtons(bool on)
+    {
+        if (joinByNameButton) joinByNameButton.interactable = on;
+        if (joinRandomButton) joinRandomButton.interactable = on;
+        if (startSoloButton) startSoloButton.interactable = true; // ソロは常時OK
+    }
+
+    void LoadPrefs()
+    {
+        var nick = PlayerPrefs.GetString(KEY_NICK, "");
+        var room = PlayerPrefs.GetString(KEY_ROOM, "");
+        if (!string.IsNullOrWhiteSpace(nick)) SetNickText(nick);
+        if (!string.IsNullOrWhiteSpace(room)) SetRoomText(room);
+        if (!string.IsNullOrWhiteSpace(nick)) PhotonNetwork.NickName = nick;
+    }
+
+    void SavePrefs()
+    {
+        PlayerPrefs.SetString(KEY_NICK, GetNickOrDefault());
+        PlayerPrefs.SetString(KEY_ROOM, GetRoomText());
+        PlayerPrefs.Save();
+    }
+
+    string GetNickOrDefault()
+    {
+        var t = GetNickText();
+        if (string.IsNullOrWhiteSpace(t)) t = "P" + Random.Range(1000, 9999);
+        return t.Trim();
+    }
+
+    string GetNickText() { return nicknameTMP ? nicknameTMP.text : (nicknameUGUI ? nicknameUGUI.text : ""); }
+    void SetNickText(string v) { if (nicknameTMP) nicknameTMP.text = v; else if (nicknameUGUI) nicknameUGUI.text = v; }
+
+    string GetRoomText() { return roomTMP ? roomTMP.text : (roomUGUI ? roomUGUI.text : ""); }
+    void SetRoomText(string v) { if (roomTMP) roomTMP.text = v; else if (roomUGUI) roomUGUI.text = v; }
+
+    void SetStatus(string msg)
+    {
+        if (statusTMP) statusTMP.text = msg;
+        if (statusUGUI) statusUGUI.text = msg;
+        Debug.Log("[Lobby] " + msg);
+    }
+
+    void AutoWire<T>(ref T field, string name) where T : Component
+    {
+        if (field) return;
+        var t = transform.Find("Canvas/Panel/" + name);
+        if (t && t.TryGetComponent(out T c)) { field = c; return; }
+        var go = GameObject.Find(name);
+        if (go && go.TryGetComponent(out c)) field = c;
+    }
+}

@@ -1,0 +1,257 @@
+# ごしゅ用 ゲーム仕様書（暫定）
+**バージョン**: v0.2  
+**更新日時**: 2025-08-21 19:58:59 UTC+09:00
+
+---
+
+## 0. 目的 / ゴール
+- 同一ルーム内で複数のミニゲームをラウンド制で実施し、個人/協力ポイントで競える。
+- オンライン（PUN）とソロ（CPUあり）を同一フレームワークで切替可能。
+- 既存機能（Lobby→Main、Back To Lobby、Prefs保存、プレイヤー移動系）は後方互換で維持。
+
+---
+
+## 1. モード構成
+### オンライン
+- Photon PUN（Master Client 主導）。
+- 時間同期: `PhotonNetwork.Time`。
+- **開始ポリシー**: `HostForce`（MasterがREADY無視で強制開始可能）/ `AllReady`。
+
+### ソロ（CPUあり）
+- PUN `OfflineMode` でローカル疑似ルーム。
+- プレイヤーは通常スポーン、Botはローカル Instantiate（ネットワーク同期なし）。
+- タイマーは `PhotonNetwork.Time`（OfflineModeではローカル駆動）。
+
+**ロビーUI**  
+- 「Join By Name」「Join Random」に加え「**Solo（CPU）**」ボタン（Bot数選択 0–10、既定3）。
+- ニックネーム/ルーム名/Bot数は PlayerPrefs に保存・復元。
+
+---
+
+## 2. セッションFSM（共通）
+```
+Waiting → RoundReady → Countdown → InRound → Intermission → (最終)Result → 継続 or Lobby
+```
+- **Waiting**: 参加/スポーン/READY待ち（ソロは即READY）。
+- **RoundReady**: ミニゲーム選定・シーン/Prefab読み込み（Additive推奨）。
+- **Countdown**: 例5秒。オンラインは条件割れで中止→Waiting戻し。
+- **InRound**: 例60–120秒。スコア加算。
+- **Intermission**: 例10秒。結果表示・次ラウンド準備。
+- **Result**: 全ラウンド終了。ランキング表示 → 継続 or ロビー。
+
+---
+
+## 3. ルーム/プレイヤー状態とイベント
+
+### 3.1 Room Custom Properties（オンライン実体／ソロはローカル擬似）
+- `SES_STATE : byte`（Waiting/…/Result）
+- `ROUND_IDX : int`
+- `MG_KEY : string`（ミニゲーム識別子）
+- `CD_END : double`（カウントダウン終了時刻）
+- `ROUND_END : double`（ラウンド終了時刻）
+- `SEED : int`（乱数同期）
+- **オンライン拡張**  
+  - `DESIRED_PLAYERS : int`（人間＋Botの目標人数）
+  - `START_POLICY : byte`（0=AllReady, 1=HostForce）
+
+### 3.2 Player Custom Properties（オンライン実体／ソロはローカル）
+- `READY : bool`
+- `SCORE : int`（総合）
+- `TEAM_ID : int`（将来用）
+
+### 3.3 Events（オンライン RaiseEvent／ソロは直呼び）
+- `EV_SCORE_DELTA (50)` : `{playerId, delta, reason}` → Master/ScoreService が集計し定期反映
+- `EV_MG_LOCAL_READY (51)` : クライアントのミニゲーム準備完了
+- `EV_MG_CUSTOM (52〜)` : 各ミニゲーム固有
+
+---
+
+## 4. 進行ポリシー（オンライン）
+- `startPolicy`: **HostForce**（Masterが強制開始可）/ AllReady
+- `desiredPlayers`: 2–8（Master指定。人間＋Botの合計目標）
+- `autoFillBotsOnline`: **true**（不足のみBot補充。過剰なら削減）
+- `botsMax`: 上限（例6）
+- `abortCountdownOnDrop`: **true**（人数/READY割れ→Waiting）
+- `lateJoinMode`: Spectator（CD/InRound 参加は観戦）
+- `lateJoinReplaceBot`: Intermission（次ラウンド前にBot→人間へ置換）
+- `minHumansToContinue`: **2**（ラウンド中の人間数が1になったら終了）  
+  - ただし **`peakHumanCount>=2` を満たしたラウンド**でのみ発火（強制開始で最初から人間1人の場合を除外）。
+
+**フロー差分**
+- Waiting/RoundReady: Masterが`desiredPlayers`設定→不足Bot数算出→**Force Start**可（`desiredPlayers>=2` のとき）。
+- Countdown: 不足Botを**Masterが生成**（Room-owned）。人間0なら中止。
+- InRound: **AIはMasterのみ実行**。`peakHumanCount`更新。`currentHumans==1 && peakHumanCount>=2` で即終了。
+- Intermission: Bot自動調整（削減/補充）。観戦→人間は**Bot置換**。
+
+---
+
+## 5. Bot（オンライン/ソロ）
+- **オンライン**  
+  - 生成: `PhotonNetwork.InstantiateRoomObject("Bot", ...)`（Room-owned推奨）。
+  - 同期: `PhotonTransformView`（補間ON）/ `PhotonRigidbodyView`（必要時）。
+  - AI: `PhotonNetwork.IsMasterClient` のみ `BotAI.enabled = true`。  
+    `OnMasterClientSwitched` で新Masterに切替。
+- **ソロ**  
+  - ローカル Instantiate（非ネットワーク）。`SoloBotManager` がスポーン。
+
+---
+
+## 6. ミニゲーム定義（ScriptableObject）
+`MinigameDef`
+- `key, displayName`
+- `mode` : Competitive | Cooperative
+- `loadType` : SceneAdditive | Prefab
+- `sceneName | prefabRef`
+- `countdownSec, timeLimitSec`
+- `abilities : AbilityMask`
+- `cameraMode : CameraMode`
+- `supportsBots : bool`
+- `botDefault : int`, `botMinMax : Vector2Int`
+- `scoreRuleId : string`
+- `uiHint : string`
+
+**レジストリ**（ScriptableObject）でラウンド順/ランダム重み管理。
+
+---
+
+## 7. プレイヤー能力 / カメラ方針
+
+### AbilityMask（ラウンドごと適用）
+- `canRun`（既定 true）, `canJump`（true）, `allowNearFarToggle`（true）, `maxSpeed : float`。
+- ミニゲーム開始時に `PunPlayer.ApplyAbilities(mask)` をローカル適用。
+
+### CameraMode（MinigameDef に含める）
+- `FixedFar` : 固定・遠視点（Main既定）
+- `FixedNear` : 固定・近視点（接近/一人称風）
+- `OrbitThirdPerson` : 右スティック/マウスで回転（TPS）
+- `FirstPerson` : 一人称（回転可）
+- `CinematicFollow` : 自動追尾（操作不可）
+
+**切替ルール**
+- ラウンド開始で `PunPlayer.ApplyCameraPolicy(mode)` を適用。  
+- `allowNearFarToggle` が true のときのみ「近/遠トグル（V / Y）」を許可。  
+- 壁抜け防止は `FixedFar`/`OrbitThirdPerson` で有効。
+
+---
+
+## 8. 入力（キーボード & コントローラー）
+- Move : `Horizontal`/`Vertical`（キーボードWSAD/左スティック）
+- Run : **LeftCtrl / LB / RB**（任意再割当可）
+- Jump : **Space / A(Cross)**  
+- 視点距離トグル : **V / Y(Triangle)**  
+- 右スティック視点（`OrbitThirdPerson`/`FirstPerson` のみ）  
+  - 追加軸: `LookX`=Joystick Axis 4, `LookY`=Axis 5（Invert推奨）  
+  - 実装: `MouseX + LookX`, `MouseY + LookY` を合算
+
+> 新Input System導入時は入力ラッパを差し替え可能に（`#if ENABLE_INPUT_SYSTEM`）。
+
+---
+
+## 9. スコアリング
+- クライアント（人間/Bot）→ `EV_SCORE_DELTA` 申告。  
+- **ScoreService（Master or Solo）** が集計、**0.2〜0.5s間隔**で `SCORE` を PlayerProps へ反映。  
+- ラウンド終了時に最終確定。  
+- タイブレーク: ①総得点 ②ラウンド勝数 ③最終ラウンド順位。
+
+---
+
+## 10. HUD / UI
+- 常時: `Round X/Y`, 残り時間, `displayName`。  
+- ランキング: 個人（将来: チーム）。  
+- 状態表示: Waiting/Countdown/InRound/Intermission/Result。  
+- **Master UI**: Force Start ボタン、`desiredPlayers` スライダー、Bot自動補充トグル。  
+- ソロ: 「CPU x N」バッジ、`Esc` でポーズ（オンラインは不可）。
+
+---
+
+## 11. 途中参加/離脱
+- 途中参加（オンライン）: Countdown/InRound は**観戦**。Intermission/Waiting で参戦可能。  
+- 離脱（オンライン）:  
+  - InRound で **人間が1人になったら即終了**（`peakHumanCount>=2` のラウンドのみ）。  
+- ソロ: 該当なし。
+
+---
+
+## 12. 既定値（MVP）
+- ラウンド数: 3  
+- 時間: `countdown=5s`, `round=90s`, `intermission=10s`  
+- オンライン: `desiredPlayers=6`, `botsMax=6`, `startPolicy=HostForce`, `minHumansToContinue=2`  
+- ソロ: Bot既定=3（0–10）  
+- ミニゲーム候補: Collect Rush / Checkpoint Dash / Prop Push / Color Floor
+
+---
+
+## 13. 受け入れ条件
+1. ロビーから**オンライン/ソロ**を選択できる。  
+2. **オンライン**: Masterが**Force Start**、不足分はBotで補充。  
+3. **InRound**: 人間が1人になったら**即終了**（該当ラウンドで2人以上いた場合）。  
+4. **Intermission**: Botの自動調整と**観戦→Bot置換**が行われる。  
+5. **カメラ方針**と**能力**がミニゲームごとに正しく適用。  
+6. **コントローラー操作**（移動/ダッシュ/ジャンプ/視点距離トグル、必要時の右スティック視点）が機能。  
+7. 既存の Lobby→Main、Back To Lobby、Prefs保存、プレイヤー移動は継続動作。
+
+---
+
+## 14. 実装順（推奨）
+- **S1**: ラウンド制FSM / MinigameDef & Registry / ScoreService（Master & Solo） / AbilityMask / CameraMode / Master UI（Force Start & desiredPlayers） / Bot（オンライン: Room-owned+AI Master実行、ソロ: ローカル）  
+- **S2**: ミニゲーム実装（Collect→Checkpoint→PropPush→ColorFloor） / HUD拡張 / ランキングUI
+
+---
+
+## 15. 既知の懸念と対策
+- Master交代でBot停止: **Room-owned生成 + OnMasterClientSwitchedでAI切替**。  
+- 強制開始で最初から人間1人: **peakHumanCountルール**で終了トリガ除外。  
+- ラグでBotがカクつく: **Transform補間**、非MasterはKinematic。  
+- 通信負荷: **序数Hz（10–20Hz）**、Botの増減はIntermissionに限定。  
+- 不正対策: **Masterで最終スコア確定**。
+
+---
+
+（以上）
+
+
+
+
+フォルダ構成
+Assets/
+├─ Resources/
+│  ├─ Prefabs/
+│  │  └─ Bot.prefab                  ← ソロ専用Bot（非ネットワーク）
+│  └─ Bot_Networked.prefab           ← オンライン用Bot（PhotonView付き, Room-owned）
+│
+├─ Scripts/
+│  ├─ Bot/
+│  │  ├─ BotAIOnline.cs              ← オンラインBotのAI（Masterのみ実行）
+│  │  └─ BotAgent.cs                 ← ソロBot用の簡易AI（非ネットワーク）
+│  │
+│  ├─ Minigame/
+│  │  ├─ AbilityAndCamera.cs         ← AbilityMask & CameraMode 定義
+│  │  └─ MinigameDef.cs              ← MinigameDef / MinigameRegistry ScriptableObject
+│  │
+│  ├─ Net/
+│  │  ├─ GameFlow/
+│  │  │  ├─ GameKeys.cs              ← ルーム/プレイヤーProp & イベントキー定義
+│  │  │  ├─ PunGameFlow.cs           ← ラウンド制FSM（HostForce/Bot補充/1人即終了対応）
+│  │  │  └─ BotManagerOnline.cs      ← 不足分Botの生成・削減（オンライン）
+│  │  │
+│  │  ├─ Score/
+│  │  │  └─ ScoreService.cs          ← EV_SCORE_DELTA集計→PlayerProps反映（Master/Solo）
+│  │  │
+│  │  ├─ UI/
+│  │  │  └─ MasterControlPanel.cs    ← Master用UI（Force Start/desiredPlayers）
+│  │  │
+│  │  └─ Solo/
+│  │     ├─ PunSolo.cs               ← ソロモード切替（OfflineMode管理）
+│  │     └─ SoloBotManager.cs        ← ソロ時にBot.prefabをスポーン
+│  │
+│  └─ (既存と同階層でOK)
+│
+└─ ScriptableObjects/
+   └─ Minigames/
+      ├─ MinigameRegistry.asset      ← ラウンド順レジストリ
+      ├─ CollectRush.asset           ← 例：ミニゲーム定義
+      ├─ CheckpointDash.asset        ← 例：ミニゲーム定義
+      ├─ PropPush.asset              ← 例：ミニゲーム定義
+      └─ ColorFloor.asset            ← 例：ミニゲーム定義
+
+

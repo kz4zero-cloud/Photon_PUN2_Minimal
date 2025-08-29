@@ -1,0 +1,38 @@
+﻿using Photon.Pun;
+using UnityEngine.SceneManagement;
+
+namespace Net.Tools
+{
+    /// <summary>
+    /// 同一シーンの重複ロードを抑止するゲート。
+    /// </summary>
+    public static class SceneLoadGate
+    {
+        private static string _lastRequested;
+
+        /// <summary>
+        /// すでに同じシーンにいる、または直前と同じ要求ならロードをスキップ。
+        /// true=ロード実行 / false=スキップ
+        /// </summary>
+        public static bool LoadLevelIfNeeded(string sceneName)
+        {
+            var active = SceneManager.GetActiveScene().name;
+            if (active == sceneName)
+            {
+                NetLog.Report($"SkipLoad :: Already in {sceneName}");
+                return false;
+            }
+            if (_lastRequested == sceneName)
+            {
+                NetLog.Report($"SkipLoad(DuplicateCall) :: {sceneName}");
+                return false;
+            }
+
+            _lastRequested = sceneName;
+            PhotonNetwork.LoadLevel(sceneName);
+            return true;
+        }
+    }
+}
+
+
