@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Pun;
 
 [RequireComponent(typeof(Toggle))]
 public class ReadyToggleAutoBind : MonoBehaviour
@@ -10,6 +11,15 @@ public class ReadyToggleAutoBind : MonoBehaviour
     void Awake()
     {
         var t = GetComponent<Toggle>();
+
+        // MasterクライアントはReadyトグルを使わない → 非表示にする
+        if (PhotonNetwork.IsMasterClient)
+        {
+            t.gameObject.SetActive(false);
+            Debug.Log("[ReadyToggleAutoBind] Master detected → Toggle hidden");
+            return;
+        }
+
         if (!flow) flow = FindObjectOfType<PunStagingFlow>();
         if (!flow)
         {
@@ -17,7 +27,7 @@ public class ReadyToggleAutoBind : MonoBehaviour
             return;
         }
 
-        // 誤配線が残っていてもOK。正しい動的呼び出しを最後に追加する
+        // Readyトグル変更時に PunStagingFlow へ伝える
         t.onValueChanged.AddListener((bool v) => {
             flow.SetReadyFromUI(v);
             NetLog.Report("AutoBindDispatch", $"ReadyToggle -> {v}");

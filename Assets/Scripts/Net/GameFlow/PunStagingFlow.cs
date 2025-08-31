@@ -1,242 +1,129 @@
-﻿using System.Collections.Generic;
+﻿// Assets/Scripts/Net/GameFlow/PunStagingFlow.cs
+using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
+using Newtonsoft.Json;
 
 public class PunStagingFlow : MonoBehaviourPunCallbacks
 {
-    // RoomProps
-    private const string RP_STATE = "gm_state"; // 0=Staging,1=Selected,2=ReadyCheck,3=Loading,4=InGame
-    private const string RP_MODE = "gm_mode";  // e.g. "Proto"
-    private const string RP_SCENE = "gm_scene"; // e.g. "Game_Proto"
-    // PlayerProps
-    private const string PP_READY = "ready";
+    private const string RP_PLAN = "gm_plan";   // ステージプラン(JSON配列)
+    private const string RP_INDEX = "gm_index";  // 現在のステージ番号
+    private const string RP_READY = "ready";     // Readyフラグ
 
-    public enum StagingState { Staging = 0, Selected = 1, ReadyCheck = 2, Loading = 3, InGame = 4 }
+    private string lastLoadedScene = "";
 
-    [Header("Settings")]
-    [SerializeField] int minPlayers = 2;
-
-    private bool loadGate = false; // 多重ロード防止
-
-    void Start()
+    private void Awake()
     {
-        PhotonNetwork.AutomaticallySyncScene = true;
-        if (!PhotonNetwork.InRoom) return;
+        Debug.Log("[Diag][PunStagingFlow] Awake scene=" +
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+    }
 
-        // 入室時は必ず自分の ready を false に初期化
-        SetMyReady(false, "EnterMain");
+    private void OnEnable()
+    {
+        Debug.Log("[Diag][PunStagingFlow] OnEnable (isActive=" + this.isActiveAndEnabled + ")");
+    }
 
-        if (PhotonNetwork.IsMasterClient)
+    private void Start()
+    {
+        Debug.Log("[Diag][PunStagingFlow] Start inRoom=" + PhotonNetwork.InRoom);
+    }
+
+    // ==== UIから呼ぶ ====
+
+    public void SetReadyFromUI(bool isReady)
+    {
+        var hash = new Hashtable { { RP_READY, isReady } };
+        PhotonNetwork.LocalPlayer.SetCustomProperties(hash);
+        Debug.Log("[Diag][PunStagingFlow] SetReadyFromUI -> " + isReady);
+    }
+
+    public void SetPlanOnly(List<string> stages)
+    {
+        if (!PhotonNetwork.IsMasterClient)
         {
-            var r = PhotonNetwork.CurrentRoom;
-            if (!r.CustomProperties.ContainsKey(RP_STATE))
+            Debug.LogWarning("[Diag][PunStagingFlow] SetPlanOnly called on non-Master");
+            return;
+        }
+
+        if (stages == null || stages.Count == 0)
+        {
+            Debug.LogWarning("[Diag][PunStagingFlow] SetPlanOnly called with empty list");
+            return;
+        }
+
+        string json = JsonConvert.SerializeObject(stages);
+        var hash = new Hashtable
+        {
+            { RP_PLAN, json },
+            { RP_INDEX, 0 }
+        };
+        PhotonNetwork.CurrentRoom.SetCustomProperties(hash);
+
+        Debug.Log("[Diag][PunStagingFlow] SetPlanOnly saved plan=" + json);
+    }
+
+    // ==== Photon コールバック ====
+
+    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+    {
+        Debug.Log("[Diag][PunStagingFlow] OnRoomPropertiesUpdate keys=" +
+            string.Join(",", propertiesThatChanged.Keys));
+
+        if (PhotonNetwork.CurrentRoom != null)
+        {
+            foreach (var kv in PhotonNetwork.CurrentRoom.CustomProperties)
             {
-                SetState(StagingState.Staging);
-                NetLog.Report("StagingInit", "Set Staging");
+                Debug.Log("[Diag][RoomProp] " + kv.Key + "=" + kv.Value);
             }
-            DumpStatus("Start"); // ←現状の一覧
-            var s = GetState(r);
-            if (s == StagingState.Selected || s == StagingState.ReadyCheck)
-                TryProceedIfAllReady("Resume");
         }
-    }
 
-    void Update()
-    {
-        // F8 でいつでもスナップショット
-        if (Input.GetKeyDown(KeyCode.F8))
-            DumpStatus("F8");
-    }
-
-    // ===== UI hooks =====
-    public void SelectMode_Proto()
-    {
-        if (!PhotonNetwork.IsMasterClient) { NetLog.Report("ModeSelectIgnored", "NotMaster"); return; }
-
-        string mode = "Proto";
-        string scene = "Game_Proto";
-
-        var r = PhotonNetwork.CurrentRoom;
-        var hash = r.CustomProperties;
-        hash[RP_MODE] = mode;
-        hash[RP_SCENE] = scene;
-        hash[RP_STATE] = (int)StagingState.Selected;
-        r.SetCustomProperties(hash);
-
-        NetLog.Report("ModeSelected", $"mode:{mode} scene:{scene}");
-        loadGate = false;
-        DumpStatus("AfterModeSelect");
-        TryProceedIfAllReady("ModeSelected");
-    }
-
-    public void SetReadyFromUI(bool on)
-    {
-        SetMyReady(on, "UI");
-        DumpStatus("AfterReadyToggle");
-        if (PhotonNetwork.IsMasterClient) TryProceedIfAllReady("ReadyToggle");
-    }
-
-    // ===== internals =====
-    private void SetMyReady(bool on, string from)
-    {
-        var lp = PhotonNetwork.LocalPlayer;
-        if (lp == null) return;
-
-        var hash = lp.CustomProperties;
-        hash[PP_READY] = on;
-        lp.SetCustomProperties(hash);
-        NetLog.Report("ReadyChanged", $"actor:{lp.ActorNumber} -> {on} ({from})");
-    }
-
-    private void TryProceedIfAllReady(string from)
-    {
-        var r = PhotonNetwork.CurrentRoom; if (r == null) return;
-        if (!PhotonNetwork.IsMasterClient) return;
-        if (loadGate) { NetLog.Report("LoadGateClosed", from); return; }
-
-        var s = GetState(r);
-        if (s != StagingState.Selected && s != StagingState.ReadyCheck) return;
-
-        NetLog.Report("StageCheck", $"from:{from} state:{s}");
-
-        // シーン決定チェック
-        if (!r.CustomProperties.TryGetValue(RP_SCENE, out var sceneObj) || string.IsNullOrEmpty(sceneObj as string))
+        // シーンロード試行
+        if (PhotonNetwork.CurrentRoom != null &&
+            PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(RP_PLAN) &&
+            PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(RP_INDEX))
         {
-            NetLog.Report("ProceedGuard", "SceneNotSet");
-            DumpStatus("SceneNotSet");
-            return;
+            string json = PhotonNetwork.CurrentRoom.CustomProperties[RP_PLAN] as string;
+            int index = (int)PhotonNetwork.CurrentRoom.CustomProperties[RP_INDEX];
+
+            List<string> stages = JsonConvert.DeserializeObject<List<string>>(json);
+            if (index >= 0 && index < stages.Count)
+            {
+                string sceneName = stages[index];
+                if (sceneName != lastLoadedScene)
+                {
+                    lastLoadedScene = sceneName;
+                    Debug.Log("[Diag][PunStagingFlow] LoadLevel -> " + sceneName);
+                    PhotonNetwork.LoadLevel(sceneName);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[Diag][PunStagingFlow] Stage index out of range");
+            }
         }
-        string sceneName = (string)sceneObj;
-
-        // 人数チェック
-        if (r.PlayerCount < minPlayers)
-        {
-            NetLog.Report("ProceedGuard", "NotEnoughPlayers");
-            DumpStatus("NotEnoughPlayers");
-            return;
-        }
-
-        // Ready 全員チェック
-        if (!AreAllReady(out var missing))
-        {
-            NetLog.Report("ProceedGuard", $"NotAllReady missing:{string.Join(",", missing)}");
-            return;
-        }
-
-        // ここまで来たら進む
-        SetState(StagingState.ReadyCheck);
-        loadGate = true;
-
-        r.IsOpen = false; r.IsVisible = false;
-        NetLog.Report("RoomClosed", $"players:{r.PlayerCount}");
-
-        SetState(StagingState.Loading);
-        NetLog.Report("LoadGame", sceneName);
-        Net.Tools.SceneLoadGate.LoadLevelIfNeeded(sceneName);
     }
 
-    private bool AreAllReady(out List<int> missingActors)
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
     {
-        missingActors = new List<int>();
-        foreach (var p in PhotonNetwork.PlayerList)
-        {
-            bool ready = p.CustomProperties.TryGetValue(PP_READY, out var v) && v is bool b && b;
-            if (!ready) missingActors.Add(p.ActorNumber);
-        }
-        if (missingActors.Count == 0)
-        {
-            NetLog.Report("AllReady", $"count:{PhotonNetwork.PlayerList.Length}");
-            return true;
-        }
-        return false;
+        Debug.Log("[Diag][PunStagingFlow] OnPlayerPropertiesUpdate player=" +
+            targetPlayer.NickName + " props=" + changedProps.ToStringFull());
     }
 
-    private StagingState GetState(Room r)
+    public override void OnJoinedRoom()
     {
-        if (r.CustomProperties.TryGetValue(RP_STATE, out var v))
-            return (StagingState)(int)(v ?? 0);
-        return StagingState.Staging;
-    }
-
-    private void SetState(StagingState s)
-    {
-        var r = PhotonNetwork.CurrentRoom; if (r == null) return;
-        var hash = r.CustomProperties;
-        hash[RP_STATE] = (int)s;
-        r.SetCustomProperties(hash);
-        NetLog.Report("StateChanged", s.ToString());
-    }
-
-    // ===== callbacks =====
-    public override void OnPlayerPropertiesUpdate(Player target, Hashtable changedProps)
-    {
-        if (changedProps.ContainsKey(PP_READY))
-        {
-            NetLog.Report("ReadyPropChanged", $"actor:{target.ActorNumber} -> {changedProps[PP_READY]}");
-            DumpStatus("PropsUpdate");
-            if (PhotonNetwork.IsMasterClient) TryProceedIfAllReady("PropsUpdate");
-        }
+        Debug.Log("[Diag][PunStagingFlow] OnJoinedRoom room=" +
+            PhotonNetwork.CurrentRoom.Name + " players=" + PhotonNetwork.CurrentRoom.PlayerCount);
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        NetLog.Report("OnPlayerEntered", $"{newPlayer.NickName}({newPlayer.ActorNumber})");
-        DumpStatus("Enter");
+        Debug.Log("[Diag][PunStagingFlow] OnPlayerEnteredRoom -> " + newPlayer.NickName);
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        NetLog.Report("OnPlayerLeft", $"{otherPlayer.NickName}({otherPlayer.ActorNumber})");
-        DumpStatus("Left");
-
-        if (!PhotonNetwork.IsMasterClient) return;
-
-        var r = PhotonNetwork.CurrentRoom;
-        var s = GetState(r);
-        if ((s == StagingState.Selected || s == StagingState.ReadyCheck) && r.PlayerCount < minPlayers)
-        {
-            r.IsOpen = true; r.IsVisible = true;
-            SetState(StagingState.Staging);
-            loadGate = false;
-            NetLog.Report("Rollback", "PlayerLeft");
-        }
-    }
-
-    public override void OnMasterClientSwitched(Player newMasterClient)
-    {
-        NetLog.Report("MasterSwitched", $"{newMasterClient.NickName}({newMasterClient.ActorNumber})");
-        DumpStatus("MasterSwitched");
-        if (PhotonNetwork.IsMasterClient)
-        {
-            loadGate = false;
-            TryProceedIfAllReady("MasterSwitched");
-        }
-    }
-
-    public override void OnRoomPropertiesUpdate(Hashtable changed)
-    {
-        if (changed.ContainsKey(RP_STATE))
-        {
-            if (changed[RP_STATE] is int s)
-                NetLog.Report("StateChanged(Notify)", ((StagingState)s).ToString());
-        }
-    }
-
-    // ===== diagnostics =====
-    private void DumpStatus(string tag)
-    {
-        var r = PhotonNetwork.CurrentRoom;
-        string sceneName = (r != null && r.CustomProperties.TryGetValue(RP_SCENE, out var so) && so is string sc) ? sc : "(none)";
-        var state = r != null ? GetState(r) : StagingState.Staging;
-        NetLog.Report("ReadySnapshot", $"{tag} state:{state} players:{PhotonNetwork.PlayerList.Length}/{minPlayers} scene:{sceneName}");
-        foreach (var p in PhotonNetwork.PlayerList)
-        {
-            bool ready = p.CustomProperties.TryGetValue(PP_READY, out var v) && v is bool b && b;
-            bool isLocal = (p == PhotonNetwork.LocalPlayer);
-            NetLog.Report("ReadyEntry", $"actor:{p.ActorNumber} nick:{p.NickName} ready:{ready} local:{isLocal} master:{p.IsMasterClient}");
-        }
+        Debug.Log("[Diag][PunStagingFlow] OnPlayerLeftRoom -> " + otherPlayer.NickName);
     }
 }
-

@@ -1,44 +1,43 @@
-using System;
-using System.IO;
+// Assets/Scripts/Net/Tools/SceneLoadWatchdog.cs
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
+using Photon.Realtime;
+using System.IO;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
-[DefaultExecutionOrder(-32000)]
-public class SceneLoadWatchdog : MonoBehaviour
+public class SceneLoadWatchdog : MonoBehaviourPunCallbacks
 {
-    void Awake()
+    private string logPath;
+
+    public override void OnEnable()
     {
-        DontDestroyOnLoad(gameObject);
-        SceneManager.activeSceneChanged += OnActiveSceneChanged;
-        SceneManager.sceneLoaded += OnSceneLoaded;
-        NetLog.Report("SceneWatchdog", $"Init in:{SceneManager.GetActiveScene().name} InRoom:{PhotonNetwork.InRoom}");
+        base.OnEnable();
+        logPath = @"C:\Users\coupl\Desktop\game\デバッグログ\scene_loadwatchdog.log";
+
+        Log("#BOOT: SceneLoadWatchdog enabled in scene [" + SceneManager.GetActiveScene().name + "]");
     }
 
-    void OnDestroy()
+    private void Start()
     {
-        SceneManager.activeSceneChanged -= OnActiveSceneChanged;
-        SceneManager.sceneLoaded -= OnSceneLoaded;
+        Log("#START: SceneLoadWatchdog Start() in scene [" + SceneManager.GetActiveScene().name + "]");
     }
 
-    void OnActiveSceneChanged(Scene prev, Scene next)
+    private void Update()
     {
-        NetLog.Report("SceneChanged",
-            $"from:{prev.name} -> to:{next.name} InRoom:{PhotonNetwork.InRoom} Master:{PhotonNetwork.IsMasterClient}");
-        if (PhotonNetwork.InRoom && next.name == "Lobby")
+        // 毎フレーム、現在シーン名と Photon 状態を出すだけ
+        string sceneName = SceneManager.GetActiveScene().name;
+        Log("#CHECK: Scene=" + sceneName +
+            " InRoom=" + PhotonNetwork.InRoom +
+            " PlayerCount=" + PhotonNetwork.CurrentRoom?.PlayerCount);
+    }
+
+    private void Log(string message)
+    {
+        try
         {
-            NetLog.Report("WARN:LobbyWhileInRoom",
-                "ActiveScene changed to Lobby while still InRoom (someone loaded Lobby).");
+            File.AppendAllText(logPath, System.DateTime.Now.ToString("HH:mm:ss.fff") + " " + message + "\n");
         }
-    }
-
-    void OnSceneLoaded(Scene scn, LoadSceneMode mode)
-    {
-        NetLog.Report("SceneLoaded", $"{scn.name} mode:{mode} InRoom:{PhotonNetwork.InRoom}");
-        if (PhotonNetwork.InRoom && scn.name == "Lobby")
-        {
-            NetLog.Report("WARN:LobbyLoadedInRoom",
-                "SceneLoaded: Lobby while InRoom. Check callers (Bootstrap/StateChanged/etc).");
-        }
+        catch { }
     }
 }
