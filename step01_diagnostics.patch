@@ -1,0 +1,106 @@
+diff --git a/Assets/Scripts/Net/Debug/PunDiagLogger.cs b/Assets/Scripts/Net/Debug/PunDiagLogger.cs
+new file mode 100644
+index 0000000..a1b2c3d
+--- /dev/null
++++ b/Assets/Scripts/Net/Debug/PunDiagLogger.cs
+@@ -0,0 +129 @@
++using UnityEngine;
++using Photon.Pun;
++using Photon.Realtime;
++using ExitGames.Client.Photon;
++
++/// <summary>
++/// どのシーンでも自動で立ち上がる Photon 診断ロガー。
++/// 挙動は一切変えず、受け取ったイベント/プロパティを [Diag] ログで出すだけ。
++/// </summary>
++public class PunDiagLogger : MonoBehaviourPunCallbacks
++{
++    // 起動後に必ず 1 度だけ生成（全シーン共通）
++    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
++    private static void Bootstrap()
++    {
++        if (FindObjectOfType<PunDiagLogger>() != null) return;
++        var go = new GameObject("PunDiagLogger");
++        Object.DontDestroyOnLoad(go);
++        go.AddComponent<PunDiagLogger>();
++        Debug.Log("[Diag] PunDiagLogger bootstrap");
++    }
++
++    private void Awake()
++    {
++        var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
++        Debug.Log($"[Diag] Awake scene={scene}");
++    }
++
++    private void OnEnable()
++    {
++        var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
++        Debug.Log($"[Diag] OnEnable scene={scene} inRoom={PhotonNetwork.InRoom} autoSync={PhotonNetwork.AutomaticallySyncScene}");
++
++        // そのシーンに PunStagingFlow が存在するか目視確認用
++        var flow = FindObjectOfType<PunStagingFlow>();
++        Debug.Log($"[Diag] PunStagingFlow in scene = {(flow != null ? "YES" : "NO")}");
++    }
++
++    private void Start()
++    {
++        Debug.Log($"[Diag] Start inRoom={PhotonNetwork.InRoom} room={PhotonNetwork.CurrentRoom?.Name}");
++    }
++
++    // ===== Photon コールバックの診断出力 =====
++    public override void OnConnectedToMaster()
++    {
++        Debug.Log("[Diag] OnConnectedToMaster");
++    }
++
++    public override void OnJoinedLobby()
++    {
++        Debug.Log("[Diag] OnJoinedLobby");
++    }
++
++    public override void OnJoinedRoom()
++    {
++        Debug.Log($"[Diag] OnJoinedRoom room={PhotonNetwork.CurrentRoom?.Name} players={PhotonNetwork.CurrentRoom?.PlayerCount}");
++    }
++
++    public override void OnLeftRoom()
++    {
++        Debug.Log("[Diag] OnLeftRoom");
++    }
++
++    public override void OnDisconnected(DisconnectCause cause)
++    {
++        Debug.Log($"[Diag] OnDisconnected cause={cause}");
++    }
++
++    public override void OnPlayerEnteredRoom(Player newPlayer)
++    {
++        Debug.Log($"[Diag] OnPlayerEntered {newPlayer?.NickName} ({newPlayer?.ActorNumber})");
++    }
++
++    public override void OnPlayerLeftRoom(Player otherPlayer)
++    {
++        Debug.Log($"[Diag] OnPlayerLeft {otherPlayer?.NickName} ({otherPlayer?.ActorNumber})");
++    }
++
++    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
++    {
++        Debug.Log($"[Diag] OnPlayerPropertiesUpdate player={targetPlayer?.NickName} props={changedProps?.ToStringFull()}");
++    }
++
++    public override void OnRoomPropertiesUpdate(Hashtable props)
++    {
++        var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
++        string keys = string.Join(",", props?.Keys ?? new System.Collections.ArrayList());
++        Debug.Log($"[Diag] OnRoomPropertiesUpdate scene={scene} keys={keys}");
++
++        var roomProps = PhotonNetwork.CurrentRoom?.CustomProperties;
++        if (roomProps != null)
++        {
++            foreach (var kv in roomProps)
++            {
++                Debug.Log($"[Diag][RoomProp] {kv.Key}={kv.Value}");
++            }
++        }
++    }
++}
