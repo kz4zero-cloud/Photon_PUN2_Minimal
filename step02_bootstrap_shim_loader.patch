@@ -1,44 +1,49 @@
 diff --git a/Assets/Scripts/Net/GameFlowV2/BootstrapShimLoader.cs b/Assets/Scripts/Net/GameFlowV2/BootstrapShimLoader.cs
 new file mode 100644
-index 0000000..b1c2d3e
+index 0000000..a1b2c3d
 --- /dev/null
 +++ b/Assets/Scripts/Net/GameFlowV2/BootstrapShimLoader.cs
-@@ -0,0 +120 @@
+@@ -0,0 +1,79 @@
 +using UnityEngine;
 +using Photon.Pun;
 +
-+// NOTE:
-+//  - Domain Reload 無効でも確実に起動するよう RuntimeInitializeOnLoadMethod を2つ使う
-+//  - すでにシーンに存在していれば何もしない（重複生成防止）
-+//  - コンソール/HUDは一切出しません
-+//
-+// 必要前提: Assets/Scripts/Net/GameFlowV2/PunStagingFlow_Shim.cs が既に存在していること
-+
-+namespace Net.GameFlowV2
++/// <summary>
++/// シーンに依存せず、起動直後に「安定したステージング面」を用意するブートストラップ。
++/// - GameObject "GameFlow" を自動生成（DontDestroyOnLoad）
++/// - PunStagingFlow_Shim と LoadingShellAutoLoader を必ずアタッチ
++/// - PhotonNetwork.AutomaticallySyncScene を有効化
++/// 画面/HUDやConsoleに依存しない安定実行のための土台です。
++/// </summary>
++public static class BootstrapShimLoader
 +{
-+    public static class BootstrapShimLoader
++    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
++    private static void EnsureStableSurface()
 +    {
-+        // SubsystemRegistration: Editor再生のたびに静的状態がクリアされる層
-+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-+        private static void SubsystemRegistration() { /* noop (将来の拡張用) */ }
-+
-+        // BeforeSceneLoad: 最も早いタイミングで常駐オブジェクトを用意する
-+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-+        private static void BeforeSceneLoad()
++        // 1) "GameFlow" を確保
++        var surfaceGo = GameObject.Find("GameFlow");
++        if (surfaceGo == null)
 +        {
-+            // 同期ロードを明示的に有効
-+            PhotonNetwork.AutomaticallySyncScene = true;
-+
-+            // 既に存在すれば何もしない
-+            if (Object.FindObjectOfType<PunStagingFlow_Shim>() != null)
-+            {
-+                return;
-+            }
-+
-+            // 常駐の GameFlow (Shim) を生成
-+            var go = new GameObject("GameFlow (Shim)");
-+            Object.DontDestroyOnLoad(go);
-+            go.AddComponent<PunStagingFlow_Shim>();
++            surfaceGo = new GameObject("GameFlow");
++            Object.DontDestroyOnLoad(surfaceGo);
 +        }
++
++        // 2) PunStagingFlow_Shim を必ず載せる
++        var shim = Object.FindObjectOfType<PunStagingFlow_Shim>();
++        if (shim == null)
++        {
++            shim = surfaceGo.GetComponent<PunStagingFlow_Shim>();
++            if (shim == null) shim = surfaceGo.AddComponent<PunStagingFlow_Shim>();
++        }
++
++        // 3) LoadingShellAutoLoader を必ず載せる
++        var auto = Object.FindObjectOfType<LoadingShellAutoLoader>();
++        if (auto == null)
++        {
++            auto = surfaceGo.GetComponent<LoadingShellAutoLoader>();
++            if (auto == null) auto = surfaceGo.AddComponent<LoadingShellAutoLoader>();
++        }
++
++        // 4) シーン自動同期をON
++        PhotonNetwork.AutomaticallySyncScene = true;
 +    }
 +}
