@@ -1,0 +1,102 @@
+diff --git a/Assets/Scripts/Net/Debug/StagingBeacon.cs b/Assets/Scripts/Net/Debug/StagingBeacon.cs
+new file mode 100644
+index 0000000..a1b2c3d
+--- /dev/null
++++ b/Assets/Scripts/Net/Debug/StagingBeacon.cs
+@@ -0,0 +130 @@
++using System;
++using System.IO;
++using System.Text;
++using UnityEngine;
++using Photon.Pun;
++using ExitGames.Client.Photon;
++
++/// <summary>
++/// コンソール/HUDを使わず、起動時点の状況を確実にファイルへ吐くビーコン。
++/// - BeforeSceneLoad で毎回1行以上出力
++/// - Unityの persistentDataPath と デスクトップ\game\デバッグ の両方へ同名で出力
++/// - さらに Debug.Log も出すので、既存の netlog_*.log にも痕跡が残る
++/// </summary>
++public static class StagingBeacon
++{
++    private const string FileName = "staging_beacon.log";
++
++    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
++    private static void WriteBootBeacon()
++    {
++        try
++        {
++            var now = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
++            var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
++            string header = $"[BOOT] {now} scene={scene} inRoom={PhotonNetwork.InRoom} autoSync={PhotonNetwork.AutomaticallySyncScene}";
++
++            // 出力先1: persistentDataPath
++            var p1 = Path.Combine(Application.persistentDataPath, FileName);
++            // 出力先2: デスクトップ\game\デバッグ
++            var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
++            var p2 = Path.Combine(desktop, "game", "デバッグ", FileName);
++
++            Directory.CreateDirectory(Path.GetDirectoryName(p1)!);
++            Directory.CreateDirectory(Path.GetDirectoryName(p2)!);
++
++            AppendLineSafe(p1, header);
++            AppendLineSafe(p2, header);
++
++            // 参考：部屋プロパティのキーだけでも残す（まだ部屋外なら空）
++            var keys = PhotonNetwork.CurrentRoom?.CustomProperties?.Keys;
++            string keyList = (keys == null) ? "(no-room)" : string.Join(",", keys);
++            AppendLineSafe(p1, "[ROOM_KEYS] " + keyList);
++            AppendLineSafe(p2, "[ROOM_KEYS] " + keyList);
++
++            Debug.Log($"[Beacon] wrote to: {p1} | {p2}");
++        }
++        catch (Exception ex)
++        {
++            Debug.LogError("[Beacon] write failed: " + ex);
++        }
++    }
++
++    private static void AppendLineSafe(string path, string line)
++    {
++        using (var fs = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
++        using (var sw = new StreamWriter(fs, new UTF8Encoding(false)))
++        {
++            sw.WriteLine(line);
++        }
++    }
++}
+diff --git a/Assets/Scripts/StageFlow/LoadingShellAutoLoader.cs b/Assets/Scripts/StageFlow/LoadingShellAutoLoader.cs
+new file mode 100644
+index 0000000..b4c3d4e
+--- /dev/null
++++ b/Assets/Scripts/StageFlow/LoadingShellAutoLoader.cs
+@@ -0,0 +80 @@
++using UnityEngine;
++using UnityEngine.SceneManagement;
++using Photon.Pun;
++using ExitGames.Client.Photon;
++
++/// <summary>
++/// ルームに gm_plan が入っていれば LoadingShell を必ず経由させるシンプルローダー。
++/// （既存実装と重複しないよう、検出のみ：gm_plan が無いなら何もしない）
++/// </summary>
++public static class LoadingShellAutoLoader
++{
++    private const string RP_PLAN = "gm_plan";
++
++    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
++    private static void KickIfPlanExists()
++    {
++        // Editor起動直後の一瞬は部屋外なので、OnJoinedRoomで拾い直される想定。
++        if (!PhotonNetwork.InRoom) return;
++        var props = PhotonNetwork.CurrentRoom?.CustomProperties;
++        if (props == null || !props.ContainsKey(RP_PLAN)) return;
++
++        // すでに LoadingShell に居るなら何もしない
++        var active = SceneManager.GetActiveScene().name;
++        if (active == "LoadingShell") return;
++
++        Debug.Log("[AutoLoader] gm_plan detected -> Load LoadingShell");
++        SceneManager.LoadScene("LoadingShell", LoadSceneMode.Single);
++    }
++}
