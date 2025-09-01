@@ -1,0 +1,51 @@
+diff --git a/Assets/Scripts/Net/GameFlowV2/BeaconBootstrap.cs b/Assets/Scripts/Net/GameFlowV2/BeaconBootstrap.cs
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/Assets/Scripts/Net/GameFlowV2/BeaconBootstrap.cs
+@@ -0,0 +1,92 @@
++using System.IO;
++using UnityEngine;
++using UnityEngine.SceneManagement;
++
++/// <summary>
++/// シーンに依存せず最速で起動し、staging_beacon.log に現在のシーンと時刻を追記するだけの超小型ブートストラップ。
++/// Unity コンソールは使わず、直接ファイルに書きます。
++/// </summary>
++public static class BeaconBootstrap
++{
++    // ★既存の SceneLoadWatchdog と同じ出力ディレクトリに合わせる
++    private const string LogPath = @"C:\Users\coupl\Desktop\game\デバッグログ\staging_beacon.log";
++
++    // できるだけ早い段階（Subsystem 登録）と、シーン読み込み前の2箇所で確実に走らせる
++    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
++    private static void OnSubsystem()
++    {
++        SafeAppend("SubsystemRegistration");
++    }
++
++    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
++    private static void OnBeforeSceneLoad()
++    {
++        SafeAppend("BeforeSceneLoad");
++        // ついでに現在シーン名も書く（このタイミングでは "Main" or "Bootstrap" 等）
++        SafeAppend("Scene:" + SceneManager.GetActiveScene().name);
++    }
++
++    // 失敗してもアプリを止めない
++    private static void SafeAppend(string phase)
++    {
++        try
++        {
++            var dir = Path.GetDirectoryName(LogPath);
++            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
++            File.AppendAllText(LogPath, Now() + " " + phase + "\n");
++        }
++        catch { /* no console log by policy */ }
++    }
++
++    private static string Now()
++    {
++        return System.DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff");
++    }
++}
