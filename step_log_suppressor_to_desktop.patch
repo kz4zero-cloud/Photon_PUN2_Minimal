@@ -1,0 +1,85 @@
+diff --git a/Assets/Scripts/Net/GameFlowV2/LegacySuppressorDesktop.cs b/Assets/Scripts/Net/GameFlowV2/LegacySuppressorDesktop.cs
+new file mode 100644
+index 0000000..a1b2c3d
+--- /dev/null
++++ b/Assets/Scripts/Net/GameFlowV2/LegacySuppressorDesktop.cs
+@@ -0,0 +1,150 @@
++using System;
++using System.Linq;
++using System.Collections;
++using UnityEngine;
++using Photon.Pun;
++
++// 競合ローダ無効化 + ログをデスクトップの game\デバッグログ\staging_suppressor.log に出力
++// FileLog は既に追加済み（Assets/Scripts/Debug/FileLog.cs）
++namespace Net.GameFlowV2
++{
++    public sealed class LegacySuppressorDesktop : MonoBehaviour
++    {
++        private static readonly string[] Suspects =
++        {
++            "SceneLoadWatchdog","RunAssertRuntime","AllReadyCountdown","StageRunStarter",
++            "ReadyDebugHotkeys","LoadingShellController","LoadingShellAutoLoader",
++            "StageRuntime","SceneLoadGate","PunGameFlow","RoomReturn","PunReturnToLobby",
++            "AutoSceneSyncOff",
++        };
++
++        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
++        private static void Install()
++        {
++            var go = new GameObject("LegacySuppressor__Desktop");
++            DontDestroyOnLoad(go);
++            go.hideFlags = HideFlags.DontSave;
++            go.AddComponent<LegacySuppressorDesktop>();
++        }
++
++        private IEnumerator Start()
++        {
++            try { PhotonNetwork.AutomaticallySyncScene = true; } catch {}
++            yield return null; // コンポーネント出揃い待ち
++
++            Write("=== LegacySuppressor begin ===");
++            Write($"scene={UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
++
++            foreach (var typeName in Suspects)
++            {
++                var t = Type.GetType(typeName) ??
++                        AppDomain.CurrentDomain.GetAssemblies()
++                          .Select(a => a.GetType(typeName))
++                          .FirstOrDefault(x => x != null);
++                if (t == null) continue;
++
++                UnityEngine.Object[] found;
++                try { found = FindObjectsOfType(t, true); }
++                catch { continue; }
++
++                foreach (var obj in found)
++                {
++                    if (obj is Behaviour b && b.enabled)
++                    {
++                        b.enabled = false;
++                        Write($"disabled {typeName} on {b.name}");
++                    }
++                }
++            }
++
++            // 最終確認でもう一度ON
++            yield return EnsureAutoSync();
++            Write("=== LegacySuppressor end ===");
++        }
++
++        private IEnumerator EnsureAutoSync()
++        {
++            var deadline = Time.realtimeSinceStartup + 5f;
++            while (!PhotonNetwork.IsConnectedAndReady && Time.realtimeSinceStartup < deadline)
++                yield return null;
++            try { PhotonNetwork.AutomaticallySyncScene = true; Write("AutoSync enforced (final)"); } catch {}
++        }
++
++        private static void Write(string line)
++        {
++            // 既定のデスクトップ配下へ
++            FileLog.Append("staging_suppressor", line);
++        }
++    }
++}
