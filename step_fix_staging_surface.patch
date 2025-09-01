@@ -1,0 +1,236 @@
+diff --git a/Assets/Scripts/Net/GameFlowV2/StagingKeys.cs b/Assets/Scripts/Net/GameFlowV2/StagingKeys.cs
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/Assets/Scripts/Net/GameFlowV2/StagingKeys.cs
+@@ -0,0 +60 @@
++using UnityEngine;
++
++// ルーム/プレイヤープロパティのキーを一元管理（V2）。
++public static class StagingKeys
++{
++    // RoomProps
++    public const string RP_PLAN  = "gm_plan";   // JSON配列 ["Game_Proto", ...]
++    public const string RP_INDEX = "gm_index";  // int 現在のインデックス
++    public const string RP_SCENE = "gm_scene";  // string 現在/次にロードすべきシーン名
++    public const string RP_STATE = "gm_state";  // "waiting" / "loading" / "running"
++
++    // PlayerProps
++    public const string PP_READY = "ready";     // bool
++
++    // 状態定数
++    public const string ST_WAITING = "waiting";
++    public const string ST_LOADING = "loading";
++    public const string ST_RUNNING = "running";
++
++    // 経由シーン（固定）
++    public const string LOADING_SHELL = "LoadingShell";
++}
+diff --git a/Assets/Scripts/Net/GameFlowV2/PunStagingFlow_Shim.cs b/Assets/Scripts/Net/GameFlowV2/PunStagingFlow_Shim.cs
+new file mode 100644
+index 0000000..2222222
+--- /dev/null
++++ b/Assets/Scripts/Net/GameFlowV2/PunStagingFlow_Shim.cs
+@@ -0,0 +240 @@
++using System;
++using System.Collections.Generic;
++using System.IO;
++using System.Text;
++using ExitGames.Client.Photon;
++using Newtonsoft.Json;
++using Photon.Pun;
++using Photon.Realtime;
++using UnityEngine;
++
++// 既存コードが呼ぶ "PunStagingFlow" まわりのAPIを受け止め、
++// ここで一元的に RoomProperties を更新 / シーン遷移を実施する。
++// 既存ファイルは書き換えず、拡張メソッドで差し替える。
++public static class PunStagingFlow_Shim
++{
++    // ---- 既存UIなどから呼ばれる想定の面 ----
++    // 例: flow.SetPlanOnly(list); flow.SetPlanAndStart(list); flow.SetReadyFromUI(true);
++
++    public static void SetPlanOnly(this PunStagingFlow _ignored, List<string> plan)
++    {
++        if (!PhotonNetwork.InRoom) return;
++        if (!PhotonNetwork.IsMasterClient) return; // PlanはMasterが決める
++        var json = JsonConvert.SerializeObject(plan ?? new List<string>());
++        var hash = new Hashtable {
++            { StagingKeys.RP_PLAN,  json },
++            { StagingKeys.RP_INDEX, 0     },
++            { StagingKeys.RP_SCENE, StagingKeys.LOADING_SHELL },
++            { StagingKeys.RP_STATE, StagingKeys.ST_WAITING }
++        };
++        PhotonNetwork.CurrentRoom.SetCustomProperties(hash);
++        Note("SetPlanOnly", $"plan={json}");
++    }
++
++    public static void SetPlanAndStart(this PunStagingFlow flow, List<string> plan)
++    {
++        flow.SetPlanOnly(plan);
++        // Master自身をReadyにして、全員Readyなら開始を試みる
++        flow.SetReadyFromUI(true);
++        flow.TryStartByReady();
++    }
++
++    public static void SetReadyFromUI(this PunStagingFlow _ignored, bool isReady)
++    {
++        if (!PhotonNetwork.InRoom) return;
++        var me = PhotonNetwork.LocalPlayer;
++        me.SetCustomProperties(new Hashtable { { StagingKeys.PP_READY, isReady } });
++        Note("SetReadyFromUI", $"ready={isReady}");
++    }
++
++    public static void TryStartByReady(this PunStagingFlow _ignored)
++    {
++        if (!PhotonNetwork.InRoom || !PhotonNetwork.IsMasterClient) return;
++        if (!AllPlayersReady()) return;
++        var room = PhotonNetwork.CurrentRoom;
++        if (!room.CustomProperties.ContainsKey(StagingKeys.RP_PLAN)) return;
++
++        // AutoSync を必ず有効に
++        PhotonNetwork.AutomaticallySyncScene = true;
++
++        // 状態を "loading" にして LoadingShell へ
++        var hash = new Hashtable {
++            { StagingKeys.RP_STATE, StagingKeys.ST_LOADING },
++            { StagingKeys.RP_SCENE, StagingKeys.LOADING_SHELL }
++        };
++        room.SetCustomProperties(hash);
++
++        SafeLoadLevel(StagingKeys.LOADING_SHELL, "TryStartByReady");
++    }
++
++    // ---- 内部ヘルパ ----
++
++    private static bool AllPlayersReady()
++    {
++        var list = PhotonNetwork.PlayerList;
++        foreach (var p in list)
++        {
++            var props = p.CustomProperties;
++            if (!(props != null && props.ContainsKey(StagingKeys.PP_READY) && props[StagingKeys.PP_READY] is bool b && b))
++                return false;
++        }
++        return list.Length > 0;
++    }
++
++    private static void SafeLoadLevel(string scene, string reason)
++    {
++        try
++        {
++            PhotonNetwork.LoadLevel(scene);
++            Note("LoadLevel", $"scene={scene} reason={reason}");
++        }
++        catch (Exception ex)
++        {
++            Note("LoadLevelError", ex.Message);
++        }
++    }
++
++    private static void Note(string tag, string msg)
++    {
++        // Console/HUDは禁止：ファイルにだけ書く
++        try
++        {
++            var dir = Path.Combine(Application.persistentDataPath, "diag");
++            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
++            File.AppendAllText(Path.Combine(dir, "notes.txt"),
++                $"{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fffZ} [{tag}] {msg}\n", Encoding.UTF8);
++        }
++        catch { }
++    }
++}
+diff --git a/Assets/Scripts/StageFlow/LoadingShellAutoLoader.cs b/Assets/Scripts/StageFlow/LoadingShellAutoLoader.cs
+new file mode 100644
+index 0000000..3333333
+--- /dev/null
++++ b/Assets/Scripts/StageFlow/LoadingShellAutoLoader.cs
+@@ -0,0 +160 @@
++using System;
++using System.Collections.Generic;
++using System.IO;
++using System.Text;
++using ExitGames.Client.Photon;
++using Newtonsoft.Json;
++using Photon.Pun;
++using UnityEngine;
++using UnityEngine.SceneManagement;
++
++// LoadingShell に入ったMasterが、ルームの gm_plan / gm_index を見て
++// 次のステージを PhotonNetwork.LoadLevel するだけの小さな自動化。
++// Console/HUDは使わない（notes.txt へ最小限の記録のみ）。
++public class LoadingShellAutoLoader : MonoBehaviour
++{
++    private static bool _hooked;
++
++    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
++    private static void Hook()
++    {
++        if (_hooked) return;
++        _hooked = true;
++        SceneManager.sceneLoaded += OnSceneLoaded;
++    }
++
++    private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
++    {
++        if (scene.name != StagingKeys.LOADING_SHELL) return;
++        var go = new GameObject("LoadingShellAutoLoader");
++        DontDestroyOnLoad(go);
++        go.AddComponent<LoadingShellAutoLoader>().Kick();
++    }
++
++    private void Kick()
++    {
++        // Masterだけが号令を出す
++        if (!PhotonNetwork.IsMasterClient) return;
++
++        try
++        {
++            var room = PhotonNetwork.CurrentRoom;
++            if (room == null) return;
++
++            var json = room.CustomProperties?[StagingKeys.RP_PLAN] as string;
++            if (string.IsNullOrEmpty(json)) return;
++
++            var plan = JsonConvert.DeserializeObject<List<string>>(json) ?? new List<string>();
++            if (plan.Count == 0) return;
++
++            var idx  = 0;
++            if (room.CustomProperties.ContainsKey(StagingKeys.RP_INDEX))
++            {
++                var v = room.CustomProperties[StagingKeys.RP_INDEX];
++                if (v is int i) idx = i;
++            }
++            idx = Mathf.Clamp(idx, 0, plan.Count - 1);
++            var next = plan[idx];
++
++            // 状態反映
++            var hash = new Hashtable {
++                { StagingKeys.RP_SCENE, next },
++                { StagingKeys.RP_STATE, StagingKeys.ST_RUNNING }
++            };
++            room.SetCustomProperties(hash);
++
++            PhotonNetwork.AutomaticallySyncScene = true;
++            PhotonNetwork.LoadLevel(next);
++            Note($"LoadingShell->Load '{next}' (idx={idx})");
++        }
++        catch (Exception ex)
++        {
++            Note("AutoLoaderError: " + ex.Message);
++        }
++    }
++
++    private static void Note(string msg)
++    {
++        try
++        {
++            var dir = Path.Combine(Application.persistentDataPath, "diag");
++            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
++            File.AppendAllText(Path.Combine(dir, "notes.txt"),
++                $"{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fffZ} [AutoLoader] {msg}\n", Encoding.UTF8);
++        }
++        catch { }
++    }
++}
