@@ -1,0 +1,49 @@
+Assets/Editor/Inventory/ProjectInventory.cs:98:            if (t.Contains("DontDestroyOnLoad("))
+Assets/Editor/Preflight/PreflightCheckerV2.cs:8://  - no_ddol: DontDestroyOnLoad は原則NG、ただしツール系ホワイトリストは除外
+Assets/Editor/Preflight/PreflightCheckerV2.cs:96:                // 2) DontDestroyOnLoad（コメント/文字列除去後）—ホワイトリストは除外
+Assets/Editor/Preflight/PreflightCheckerV2.cs:97:                if (stripped.Contains("DontDestroyOnLoad("))
+Assets/Photon/PhotonChat/Demos/DemoChat/ChatGui.cs:123:            DontDestroyOnLoad(this.gameObject);
+Assets/Photon/PhotonLibs/changes-library.txt:838:    Fixed: Unity library SocketWebTcp class for websocket support. It requires a coroutine on a new GameObject which is now marked as DontDestroyOnLoad(go) and survives scene loading.
+Assets/Photon/PhotonRealtime/Code/ConnectionHandler.cs:60:        public bool ApplyDontDestroyOnLoad = true;
+Assets/Photon/PhotonRealtime/Code/ConnectionHandler.cs:95:        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+Assets/Photon/PhotonRealtime/Code/ConnectionHandler.cs:111:            if (this.ApplyDontDestroyOnLoad)
+Assets/Photon/PhotonRealtime/Code/ConnectionHandler.cs:113:                DontDestroyOnLoad(this.gameObject);
+Assets/Photon/PhotonRealtime/Code/RegionHandler.cs:870:            DontDestroyOnLoad(go);
+Assets/Photon/PhotonRealtime/Code/SystemConnectionSummary.cs:35:    /// DontDestroyOnLoad.
+Assets/Photon/PhotonRealtime/Demos/DemoLoadBalancing/DemoLoadBalancing-Scene.unity:539:  ApplyDontDestroyOnLoad: 1
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:1037:                StaticReset();  // in OLDER unity editor versions there is no RuntimeInitializeOnLoadMethod, so call reset
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:1044:        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs:1009:                    Debug.LogError(string.Format("PhotonView ID duplicate found: {0}. New: {1} old: {2}. Maybe one wasn't destroyed on scene load?! Check for 'DontDestroyOnLoad'. Destroying old entry, adding new.", netView.ViewID, netView, listedView));
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs.bak:1009:                    Debug.LogError(string.Format("PhotonView ID duplicate found: {0}. New: {1} old: {2}. Maybe one wasn't destroyed on scene load?! Check for 'DontDestroyOnLoad'. Destroying old entry, adding new.", netView.ViewID, netView, listedView));
+Assets/Photon/PhotonUnityNetworking/Demos/DemoHub/Scripts/ToDemoHubButton.cs:56:	        DontDestroyOnLoad(gameObject);
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/PlayerManager.cs:74:            DontDestroyOnLoad(gameObject);
+Assets/Photon/PhotonUnityNetworking/UtilityScripts/Debugging/StatesGui.cs:49:                DontDestroyOnLoad(this.gameObject);
+Assets/Photon/PhotonUnityNetworking/UtilityScripts/PhotonPlayer/PlayerNumbering.cs:78:                DontDestroyOnLoad(this.gameObject);
+Assets/Photon/PhotonUnityNetworking/changelog.txt:101:Changed: PhotonNetwork.StaticReset was running as RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad) but will run earlier now, using AfterAssembliesLoaded.
+Assets/Scripts/Debug/ForwardUnityLog.cs:8:        DontDestroyOnLoad(gameObject);
+Assets/Scripts/Debug/SceneLoadProbe.cs:6:    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+Assets/Scripts/Net/Tools/HideDevConsole.cs:12:        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+Assets/Scripts/Net/Tools/HideDevConsole.cs:16:            DontDestroyOnLoad(go);
+Assets/Scripts/Net/Tools/LobbyWhileInRoomGuard.cs:13:        DontDestroyOnLoad(gameObject);
+Assets/Scripts/Net/Tools/LobbyWhileInRoomGuard.cs.bak:13:        DontDestroyOnLoad(gameObject);
+Assets/Scripts/Net/Tools/LogCopyRuntime.cs:13:        DontDestroyOnLoad(gameObject);
+Assets/Scripts/Net/Tools/PrefabPrewarm.cs:16:        DontDestroyOnLoad(gameObject);
+Assets/Scripts/Net/Tools/Prewarm.cs:7:    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+step01_diagnostics.patch:17:-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+step01_diagnostics.patch:22:-        Object.DontDestroyOnLoad(go);
+step01_diagnostics.patch:29:+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+step01_diagnostics.patch:33:+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+step01_diagnostics.patch:39:+        DontDestroyOnLoad(go);
+step02_bootstrap_shim_loader.patch:12:+/// - GameObject "GameFlow" を自動生成（DontDestroyOnLoad）
+step02_bootstrap_shim_loader.patch:19:+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+step02_bootstrap_shim_loader.patch:27:+            Object.DontDestroyOnLoad(surfaceGo);
+step02b_beacon_trace.patch:24:+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+step02b_beacon_trace.patch:87:+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+step02b_force_bootstrap_and_beacon.patch:16:+    /// - DontDestroyOnLoad("GameFlow") を生成
+step02b_force_bootstrap_and_beacon.patch:26:+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+step02b_force_bootstrap_and_beacon.patch:37:+                Object.DontDestroyOnLoad(surface);
+step02b_force_bootstrap_and_beacon.patch:120:+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+step02c_beacon_bootstrap.patch:21:+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+step02c_beacon_bootstrap.patch:27:+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+step_fix_staging_surface.patch:167:+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+step_fix_staging_surface.patch:179:+        DontDestroyOnLoad(go);

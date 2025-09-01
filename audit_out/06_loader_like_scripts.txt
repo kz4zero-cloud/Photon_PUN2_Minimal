@@ -1,0 +1,225 @@
+Assets/Editor/Preflight/PreflightCheckerV2.cs:32:            "/LobbyWhileInRoomGuard.cs",
+Assets/Editor/Preflight/PreflightCheckerV2.cs:35:            "/SceneLoadWatchdog.cs",
+Assets/Editor/StageRunPlanAutoSetup.cs:1:// Assets/Editor/StageRunPlanAutoSetup.cs
+Assets/Editor/StageRunPlanAutoSetup.cs:5:public class StageRunPlanAutoSetup : EditorWindow
+Assets/Editor/StageRunPlanAutoSetup.cs:7:    [MenuItem("Tools/StageRunPlan/Auto Setup")]
+Assets/Editor/StageRunPlanAutoSetup.cs:10:        GetWindow<StageRunPlanAutoSetup>("StageRunPlan Auto Setup");
+Assets/Editor/StageRunPlanAutoSetup.cs:15:        GUILayout.Label("StageRunPlan‚Ì©“®İ’è", EditorStyles.boldLabel);
+Assets/Editor/StageRunPlanAutoSetup.cs:17:        if (GUILayout.Button("Set StageRunPlan to LoadingShellController"))
+Assets/Editor/StageRunPlanAutoSetup.cs:19:            ApplyStageRunPlanToLoadingShellController();
+Assets/Editor/StageRunPlanAutoSetup.cs:23:    private void ApplyStageRunPlanToLoadingShellController()
+Assets/Editor/StageRunPlanAutoSetup.cs:25:        var loadingShellController = GameObject.FindObjectOfType<LoadingShellController>();
+Assets/Editor/StageRunPlanAutoSetup.cs:29:            StageRunPlan stageRunPlan = AssetDatabase.LoadAssetAtPath<StageRunPlan>("Assets/StageRunPlan.asset");
+Assets/Editor/StageRunPlanAutoSetup.cs:33:                // StageRunPlan ‚ğ LoadingShellController ‚Éİ’è
+Assets/Editor/StageRunPlanAutoSetup.cs:35:                Debug.Log("[StageRunPlanAutoSetup] StageRunPlan ‚ğ LoadingShellController ‚Éİ’è‚µ‚Ü‚µ‚½B");
+Assets/Editor/StageRunPlanAutoSetup.cs:39:                Debug.LogWarning("[StageRunPlanAutoSetup] StageRunPlan ƒAƒZƒbƒg‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ‚Å‚µ‚½B");
+Assets/Editor/StageRunPlanAutoSetup.cs:44:            Debug.LogWarning("[StageRunPlanAutoSetup] LoadingShellController ‚ªƒV[ƒ““à‚É‘¶İ‚µ‚Ü‚¹‚ñB");
+Assets/Editor/StageRunPlanDebugWindow.cs:1:// Assets/Editor/StageRunPlanDebugWindow.cs
+Assets/Editor/StageRunPlanDebugWindow.cs:2:// –Ú“I: UnityƒGƒfƒBƒ^“à‚ÌƒEƒBƒ“ƒhƒE‚ğg—p‚µ‚ÄAStageRunPlan‚Ìİ’è‚ğŠm”F
+Assets/Editor/StageRunPlanDebugWindow.cs:6:public class StageRunPlanDebugWindow : EditorWindow
+Assets/Editor/StageRunPlanDebugWindow.cs:8:    [MenuItem("Tools/StageRunPlan/Check Plan")]
+Assets/Editor/StageRunPlanDebugWindow.cs:11:        GetWindow<StageRunPlanDebugWindow>("StageRunPlan Check");
+Assets/Editor/StageRunPlanDebugWindow.cs:14:    public StageRunPlan plan;
+Assets/Editor/StageRunPlanDebugWindow.cs:18:        GUILayout.Label("StageRunPlan ‚Ìİ’èŠm”F", EditorStyles.boldLabel);
+Assets/Editor/StageRunPlanDebugWindow.cs:20:        plan = (StageRunPlan)EditorGUILayout.ObjectField("StageRunPlan", plan, typeof(StageRunPlan), false);
+Assets/Editor/StageRunPlanDebugWindow.cs:24:            GUILayout.Label("StageRunPlan ‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+Assets/Editor/StageRunPlanDebugWindow.cs:39:                Debug.Log("[StageRunPlanDebugWindow] StageRunPlan is set correctly.");
+Assets/Scenes/LoadingShell.unity:187:  loadingShellScene: LoadingShell
+Assets/Scenes/Main.unity:138:  m_Name: PunBootstrap
+Assets/Scenes/Main.unity:318:  loadingShellScene: LoadingShell
+Assets/Scenes/Main.unity:332:  loadingShellScene: LoadingShell
+Assets/Scenes/Main.unity:423:        m_TargetAssemblyTypeName: PunStagingFlow, Assembly-CSharp
+Assets/Scenes/Main.unity:1546:        m_TargetAssemblyTypeName: StageRunStarter, Assembly-CSharp
+Assets/Scenes/Main.unity:2395:  m_Name: StageSelectUI
+Assets/Scenes/Main.unity:2521:        m_TargetAssemblyTypeName: PunStagingFlow, Assembly-CSharp
+Assets/Scripts/Debug/ReadyDebugHotkeys.cs:3:public class ReadyDebugHotkeys : MonoBehaviour
+Assets/Scripts/Debug/ReadyDebugHotkeys.cs:5:    public PunStagingFlow flow; // Inspector ‚Å GameFlow ©•ª©g‚ğŠ„“–i–¢w’è‚È‚ç’T‚·j
+Assets/Scripts/Debug/ReadyDebugHotkeys.cs:7:    private void Reset() { flow = GetComponent<PunStagingFlow>(); }
+Assets/Scripts/Debug/ReadyDebugHotkeys.cs:8:    private void Awake() { if (!flow) flow = GetComponent<PunStagingFlow>(); }
+Assets/Scripts/Debug/ReadyDebugHotkeys.cs:26:            // f’fƒXƒiƒbƒvƒVƒ‡ƒbƒgiPunStagingFlow ‘¤‚ÅF8‘Î‰Ï‚İj
+Assets/Scripts/Debug/ReadyToggleAutoBind.cs:8:    [Tooltip("–¢w’è‚È‚çƒV[ƒ““à‚Ì PunStagingFlow ‚ğ©“®ŒŸo")]
+Assets/Scripts/Debug/ReadyToggleAutoBind.cs:9:    public PunStagingFlow flow;
+Assets/Scripts/Debug/ReadyToggleAutoBind.cs:23:        if (!flow) flow = FindObjectOfType<PunStagingFlow>();
+Assets/Scripts/Debug/ReadyToggleAutoBind.cs:26:            NetLog.Report("AutoBind", "PunStagingFlow not found");
+Assets/Scripts/Debug/ReadyToggleAutoBind.cs:30:        // ReadyƒgƒOƒ‹•ÏX‚É PunStagingFlow ‚Ö“`‚¦‚é
+Assets/Scripts/Debug/RunAssert.cs:1:// Assets/Scripts/Debug/RunAssert.cs
+Assets/Scripts/Debug/RunAssert.cs:8:public static class RunAssert
+Assets/Scripts/Debug/RunAssert.cs:36:            Debug.Log("[RunAssert] " + line);
+Assets/Scripts/Debug/RunAssertRuntime.cs:1:// Assets/Scripts/Debug/RunAssertRuntime.cs
+Assets/Scripts/Debug/RunAssertRuntime.cs:2:// –Ú“IFÀs’†‚ÌŠÈˆÕ©ŒÈf’f‚ÆuFinishƒL[‚Å LoadingShell ‚É–ß‚·v“®ü‚ğ’ñ‹ŸB
+Assets/Scripts/Debug/RunAssertRuntime.cs:3:// EF9(Šù’è)‚Å LoadingShell ‚ğ Single ‚Åƒ[ƒhiPlan‚ª‚ ‚ê‚Î‘±‚«/–³‚¯‚ê‚ÎMain‚Ö–ß‚éj
+Assets/Scripts/Debug/RunAssertRuntime.cs:10:public sealed class RunAssertRuntime : MonoBehaviourPunCallbacks
+Assets/Scripts/Debug/RunAssertRuntime.cs:13:    [Tooltip("ƒeƒXƒgŠ®—¹(Finish)‚Ég‚¤ƒL[B‰Ÿ‚·‚Æ LoadingShell ‚ğƒ[ƒh‚µ‚Ü‚·B")]
+Assets/Scripts/Debug/RunAssertRuntime.cs:18:    public string loadingShellScene = "LoadingShell";
+Assets/Scripts/Debug/RunAssertRuntime.cs:29:        Debug.Log($"[RunAssert] begin scene={scene} product={Application.productName} unity={Application.unityVersion}");
+Assets/Scripts/Debug/RunAssertRuntime.cs:34:        Debug.Log("[RunAssert] mark ready=1");
+Assets/Scripts/Debug/RunAssertRuntime.cs:42:            // Finish ¨ LoadingShell ‚ğSingle‚Åƒ[ƒh
+Assets/Scripts/Debug/RunAssertRuntime.cs:43:            Debug.Log("[RunAssert] Finish -> Load LoadingShell");
+Assets/Scripts/Debug/RunAssertRuntime.cs:50:                Debug.LogWarning("[RunAssert] loadingShellScene ‚ª–¢İ’è‚Å‚·B");
+Assets/Scripts/Debug/RunAssertRuntime.cs:59:        Debug.Log("[RunAssert] mark spawned=1");
+Assets/Scripts/Debug/RunAssertRuntime.cs:66:        Debug.Log("[RunAssert] mark ready=1");
+Assets/Scripts/Debug/RunAssertRuntime.cs:75:            Debug.Log("[RunAssert] assert_pass spawn_once");
+Assets/Scripts/Debug/RunAssertRuntime.cs:82:        Debug.Log("[RunAssert] assert_pass no_leftover_on_leave");
+Assets/Scripts/Debug/SpawnDiagnostics.cs:143:        if (!PhotonNetwork.InRoom) reasons.Add("NOT_IN_ROOM: •”‰®‚É“ü‚Á‚Ä‚¢‚Ü‚¹‚ñiLoadingShell‚Å Ensure Photon Ready=ON ‚ğŠm”Fj");
+Assets/Scripts/Debug/StageRunPlanDebugCheck.cs:1:// Assets/Scripts/Debug/StageRunPlanDebugCheck.cs
+Assets/Scripts/Debug/StageRunPlanDebugCheck.cs:2:// –Ú“I: `StageRunPlan` ‚ª³‚µ‚­İ’è‚³‚ê‚Ä‚¢‚é‚©AƒXƒe[ƒW‘JˆÚ‚ª³í‚És‚í‚ê‚é‚©‚ğŠm”F
+Assets/Scripts/Debug/StageRunPlanDebugCheck.cs:5:public class StageRunPlanDebugCheck : MonoBehaviour
+Assets/Scripts/Debug/StageRunPlanDebugCheck.cs:7:    public StageRunPlan plan;
+Assets/Scripts/Debug/StageRunPlanDebugCheck.cs:13:            Debug.LogError("[StageRunPlanDebugCheck] StageRunPlan is not assigned!");
+Assets/Scripts/Debug/StageRunPlanDebugCheck.cs:17:            Debug.Log("[StageRunPlanDebugCheck] StageRunPlan is set correctly.");
+Assets/Scripts/Debug/StageRunPlanDebugCheck.cs:20:                Debug.Log($"[StageRunPlanDebugCheck] Stage: {stage}");
+Assets/Scripts/Debug/StageRunPlanDebugCheck.cs:25:        Debug.Log("[StageRunPlanDebugCheck] Checking stage progression...");
+Assets/Scripts/Debug/StageRunPlanDebugCheck.cs:33:            Debug.Log("[StageRunPlanDebugCheck] Stage 1: " + plan.stages[0]);
+Assets/Scripts/Debug/StageRunPlanDebugCheck.cs:34:            Debug.Log("[StageRunPlanDebugCheck] Stage 2: " + plan.stages[1]);
+Assets/Scripts/Debug/StageRunPlanDebugCheck.cs:38:            Debug.LogWarning("[StageRunPlanDebugCheck] Plan stages are not set correctly.");
+Assets/Scripts/Net/GameFlow/AllReadyCountdown.cs:8:public class AllReadyCountdown : MonoBehaviourPunCallbacks
+Assets/Scripts/Net/GameFlow/AllReadyCountdown.cs.bak:8:public class AllReadyCountdown : MonoBehaviourPunCallbacks
+Assets/Scripts/Net/GameFlow/MainStagingReset.cs:12:    // PunStagingFlow ï¿½Æï¿½ï¿½í‚¹ï¿½ï¿½ï¿½Lï¿½[
+Assets/Scripts/Net/GameFlow/MainStagingReset.cs:17:    public PunStagingFlow flow; // ï¿½ï¿½ï¿½İ’ï¿½È‚ç©ï¿½ï¿½ï¿½ï¿½ï¿½o
+Assets/Scripts/Net/GameFlow/MainStagingReset.cs:22:        if (!flow) flow = FindObjectOfType<PunStagingFlow>();
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:1:ï»¿// Assets/Scripts/Net/GameFlow/PunStagingFlow.cs
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:9:public class PunStagingFlow : MonoBehaviourPunCallbacks
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:19:        Debug.Log("[Diag][PunStagingFlow] Awake scene=" +
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:25:        Debug.Log("[Diag][PunStagingFlow] OnEnable (isActive=" + this.isActiveAndEnabled + ")");
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:30:        Debug.Log("[Diag][PunStagingFlow] Start inRoom=" + PhotonNetwork.InRoom);
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:39:        Debug.Log("[Diag][PunStagingFlow] SetReadyFromUI -> " + isReady);
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:46:            Debug.LogWarning("[Diag][PunStagingFlow] SetPlanOnly called on non-Master");
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:52:            Debug.LogWarning("[Diag][PunStagingFlow] SetPlanOnly called with empty list");
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:64:        Debug.Log("[Diag][PunStagingFlow] SetPlanOnly saved plan=" + json);
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:71:        Debug.Log("[Diag][PunStagingFlow] OnRoomPropertiesUpdate keys=" +
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:97:                    Debug.Log("[Diag][PunStagingFlow] LoadLevel -> " + sceneName);
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:103:                Debug.LogWarning("[Diag][PunStagingFlow] Stage index out of range");
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:110:        Debug.Log("[Diag][PunStagingFlow] OnPlayerPropertiesUpdate player=" +
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:116:        Debug.Log("[Diag][PunStagingFlow] OnJoinedRoom room=" +
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:122:        Debug.Log("[Diag][PunStagingFlow] OnPlayerEnteredRoom -> " + newPlayer.NickName);
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:127:        Debug.Log("[Diag][PunStagingFlow] OnPlayerLeftRoom -> " + otherPlayer.NickName);
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs.bak:7:public class PunStagingFlow : MonoBehaviourPunCallbacks
+Assets/Scripts/Net/PunBootstrap.cs:9:public class PunBootstrap : MonoBehaviourPunCallbacks
+Assets/Scripts/Net/PunBootstrap.cs:81:            Debug.LogWarning("[PunBootstrap] ForceSpawnFlagFalse failed: " + e.Message);
+Assets/Scripts/Net/Tools/LobbyWhileInRoomGuard.cs:6:public class LobbyWhileInRoomGuard : MonoBehaviour
+Assets/Scripts/Net/Tools/LobbyWhileInRoomGuard.cs.bak:6:public class LobbyWhileInRoomGuard : MonoBehaviour
+Assets/Scripts/Net/Tools/NetDiagHUD.cs:24:        bool bootstrapOk = FindObjectsOfType<PunBootstrap>().Any(go => go.isActiveAndEnabled);
+Assets/Scripts/Net/Tools/NetDiagHUD.cs:25:        GUILayout.Label($"Prefab '{PrefabPath}': {(prefabOk ? "FOUND" : "MISSING")}   PunBootstrap: {(bootstrapOk ? "ACTIVE" : "MISSING")}");
+Assets/Scripts/Net/Tools/NetReportLogger.cs:83:            var boots = FindObjectsOfType<PunBootstrap>(includeInactive: true);
+Assets/Scripts/Net/Tools/NetReportLogger.cs:84:            sb.AppendLine($"PunBootstrap in scene: {boots.Length}");
+Assets/Scripts/Net/Tools/NetSanityCheck.cs:71:        int boots = FindObjectsOfType<PunBootstrap>(true).Length;
+Assets/Scripts/Net/Tools/NetSanityCheck.cs:75:        sb.Append("PunBootstrap in scene: ").Append(boots).AppendLine();
+Assets/Scripts/Net/Tools/NetSanityCheck.cs:101:        var boots = FindObjectsOfType<PunBootstrap>(true);
+Assets/Scripts/Net/Tools/NetSanityCheck.cs:102:        sb.Append("PunBootstrap count: ").Append(boots.Length).AppendLine();
+Assets/Scripts/Net/Tools/NetUnifiedHUD.cs:72:        var boots = FindObjectsOfType<PunBootstrap>(true);
+Assets/Scripts/Net/Tools/NetUnifiedHUD.cs:75:        sb.AppendLine($"PunBootstrap in scene: {boots.Length}");
+Assets/Scripts/Net/Tools/SceneLoadWatchdog.cs:1:// Assets/Scripts/Net/Tools/SceneLoadWatchdog.cs
+Assets/Scripts/Net/Tools/SceneLoadWatchdog.cs:9:public class SceneLoadWatchdog : MonoBehaviourPunCallbacks
+Assets/Scripts/Net/Tools/SceneLoadWatchdog.cs:18:        Log("#BOOT: SceneLoadWatchdog enabled in scene [" + SceneManager.GetActiveScene().name + "]");
+Assets/Scripts/Net/Tools/SceneLoadWatchdog.cs:23:        Log("#START: SceneLoadWatchdog Start() in scene [" + SceneManager.GetActiveScene().name + "]");
+Assets/Scripts/StageFlow/LoadingShellController.cs:1:// Assets/Scripts/StageFlow/LoadingShellController.cs
+Assets/Scripts/StageFlow/LoadingShellController.cs:5:public class LoadingShellController : MonoBehaviour
+Assets/Scripts/StageFlow/LoadingShellController.cs:8:    public StageRunPlan plan;  // StageRunPlan ‚ğ’Ç‰Á
+Assets/Scripts/StageFlow/LoadingShellController.cs:22:            Debug.LogWarning("[LoadingShellController] StageRunPlan‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+Assets/Scripts/StageFlow/LoadingShellController.cs:30:        Debug.Log("[LoadingShellController] Next stage set: " + nextScene);
+Assets/Scripts/StageFlow/LoadingShellController.cs:43:        Debug.Log("[LoadingShellController] Stage is ready.");
+Assets/Scripts/StageFlow/LoadingShellController.cs:48:        Debug.Log("[TRACE] LoadingShellController.StartNextStage called (isReady=" + isReady + ")");
+Assets/Scripts/StageFlow/LoadingShellController.cs:53:            Debug.Log("[TRACE] LoadingShellController loading next scene: " + nextScene);
+Assets/Scripts/StageFlow/StageRunPlan.cs:1:// Assets/Scripts/StageFlow/StageRunPlan.cs
+Assets/Scripts/StageFlow/StageRunPlan.cs:6:[CreateAssetMenu(menuName = "Game/Stage Run Plan", fileName = "StageRunPlan")]
+Assets/Scripts/StageFlow/StageRunPlan.cs:7:public sealed class StageRunPlan : ScriptableObject
+Assets/Scripts/StageFlow/StageRunPlanCheck.cs:1:// Assets/Scripts/StageFlow/StageRunPlanCheck.cs
+Assets/Scripts/StageFlow/StageRunPlanCheck.cs:2:// –Ú“I: StageRunPlan ‚ª³‚µ‚­İ’è‚³‚ê‚Ä‚¢‚é‚©‚ğŠm”F‚·‚é‚½‚ß‚ÌƒR[ƒhB
+Assets/Scripts/StageFlow/StageRunPlanCheck.cs:5:public class StageRunPlanCheck : MonoBehaviour
+Assets/Scripts/StageFlow/StageRunPlanCheck.cs:7:    public StageRunPlan plan;
+Assets/Scripts/StageFlow/StageRunPlanCheck.cs:13:            Debug.LogError("[StageRunPlanCheck] StageRunPlan is not assigned!");
+Assets/Scripts/StageFlow/StageRunPlanCheck.cs:17:            Debug.Log("[StageRunPlanCheck] StageRunPlan is set correctly.");
+Assets/Scripts/StageFlow/StageRunPlanCheck.cs:20:                Debug.Log($"[StageRunPlanCheck] Stage: {stage}");
+Assets/Scripts/StageFlow/StageRunPlanCheck.cs:25:        Debug.Log("[StageRunPlanCheck] Checking stage progression...");
+Assets/Scripts/StageFlow/StageRunPlanCheck.cs:33:            Debug.Log("[StageRunPlanCheck] Stage 1: " + plan.stages[0]);
+Assets/Scripts/StageFlow/StageRunPlanCheck.cs:34:            Debug.Log("[StageRunPlanCheck] Stage 2: " + plan.stages[1]);
+Assets/Scripts/StageFlow/StageRunPlanCheck.cs:38:            Debug.LogWarning("[StageRunPlanCheck] Plan stages are not set correctly.");
+Assets/Scripts/StageFlow/StageRunStarter.cs:1:// Assets/Scripts/StageFlow/StageRunStarter.cs
+Assets/Scripts/StageFlow/StageRunStarter.cs:5:public sealed class StageRunStarter : MonoBehaviour
+Assets/Scripts/StageFlow/StageRunStarter.cs:9:    public StageRunPlan plan;
+Assets/Scripts/StageFlow/StageRunStarter.cs:12:    [Tooltip("’†ŒpƒV[ƒ“–¼i’Êí‚Í LoadingShellj")]
+Assets/Scripts/StageFlow/StageRunStarter.cs:13:    public string loadingShellScene = "LoadingShell";
+Assets/Scripts/StageFlow/StageRunStarter.cs:21:        Debug.Log("[TRACE] StageRunStarter.StartRun called");
+Assets/Scripts/StageFlow/StageRunStarter.cs:25:            Debug.LogWarning("[StageRunStarter] plan ‚ª–¢İ’è‚Å‚·BStageRunPlan ‚ğŠ„‚è“–‚Ä‚Ä‚­‚¾‚³‚¢B");
+Assets/Scripts/StageFlow/StageRunStarter.cs:28:        StageRuntime.StartPlan(plan);
+Assets/Scripts/StageFlow/StageRunStarter.cs:29:        Debug.Log("[TRACE] StageRunStarter loading shell=" + loadingShellScene);
+Assets/Scripts/StageFlow/StageRuntime.cs:1:// Assets/Scripts/StageFlow/StageRuntime.cs
+Assets/Scripts/StageFlow/StageRuntime.cs:6:public sealed class StageRuntime : MonoBehaviour
+Assets/Scripts/StageFlow/StageRuntime.cs:8:    private static StageRunPlan s_plan;
+Assets/Scripts/StageFlow/StageRuntime.cs:14:    public static void StartPlan(StageRunPlan plan)
+Assets/Scripts/StageFlow/StageRuntime.cs:16:        Debug.Log("[TRACE] StageRuntime.StartPlan called");
+Assets/Scripts/StageFlow/StageRuntime.cs:26:        Debug.Log("[TRACE] StageRuntime.LoadNextStage called (index=" + s_index + ")");
+Assets/Scripts/StageFlow/StageRuntime.cs:30:            Debug.LogWarning("[StageRuntime] plan ‚ª–¢İ’è‚©‹ó‚Å‚·BMain ‚É–ß‚è‚Ü‚·B");
+Assets/Scripts/StageFlow/StageRuntime.cs:37:            Debug.Log("[StageRuntime] ‚·‚×‚Ä‚ÌƒXƒe[ƒW‚ªI—¹‚µ‚Ü‚µ‚½BMain ‚É–ß‚è‚Ü‚·B");
+Assets/Scripts/StageFlow/StageRuntime.cs:43:        Debug.Log("[TRACE] StageRuntime.LoadNextStage -> loading: " + nextStage);
+Assets/Scripts/StageFlow/StageRuntime.cs:53:        Debug.Log("[TRACE] StageRuntime.RunCurrentStage called (index=" + s_index + ")");
+Assets/Scripts/StageFlow/StageRuntime.cs:56:            Debug.LogWarning("[StageRuntime] plan ‚ª–¢İ’è‚©‹ó‚Å‚·BMain ‚É–ß‚è‚Ü‚·B");
+Assets/Scripts/StageFlow/StageRuntime.cs:63:            Debug.Log("[StageRuntime] index ‚ª”ÍˆÍŠO‚Å‚·BMain ‚É–ß‚è‚Ü‚·B");
+Assets/Scripts/StageFlow/StageRuntime.cs:69:        Debug.Log("[TRACE] StageRuntime.RunCurrentStage -> loading: " + currentStage);
+Assets/Scripts/StageFlow/StageRuntime.cs:79:        Debug.Log("[TRACE] StageRuntime.OnStageComplete called (index=" + s_index + ")");
+Assets/Scripts/StageFlow/StageSelectUI.cs:1:ï»¿// Assets/Scripts/StageFlow/StageSelectUI.cs
+Assets/Scripts/StageFlow/StageSelectUI.cs:11:/// é¸æŠã•ã‚ŒãŸãƒ—ãƒ©ãƒ³ã¯ PunStagingFlow ã«é€ã‚‰ã‚Œã€Room å…¨ä½“ã«åŒæœŸã•ã‚Œã‚‹ã€‚
+Assets/Scripts/StageFlow/StageSelectUI.cs:13:public class StageSelectUI : MonoBehaviour
+Assets/Scripts/StageFlow/StageSelectUI.cs:23:    private PunStagingFlow flow;
+Assets/Scripts/StageFlow/StageSelectUI.cs:27:        flow = FindObjectOfType<PunStagingFlow>();
+Assets/Scripts/StageFlow/StageSelectUI.cs:30:            Debug.LogError("[StageSelectUI] PunStagingFlow ãŒã‚·ãƒ¼ãƒ³ã«å­˜åœ¨ã—ã¾ã›ã‚“");
+Assets/Scripts/StageFlow/StageSelectUI.cs:85:            Debug.LogWarning("[StageSelectUI] Confirmã¯Masterã®ã¿ãŒæœ‰åŠ¹ã§ã™");
+Assets/Scripts/StageFlow/StageSelectUI.cs:91:            Debug.LogWarning("[StageSelectUI] ã‚¹ãƒ†ãƒ¼ã‚¸ãŒé¸æŠã•ã‚Œã¦ã„ã¾ã›ã‚“");
+Assets/Scripts/StageFlow/StageSelectUI.cs:96:        Debug.Log("[StageSelectUI] Plan confirmed and sent to PunStagingFlow: " + string.Join(",", selectedStages));
+Assets/StageRunPlan.asset:13:  m_Name: StageRunPlan
+ProjectSettings/EditorBuildSettings.asset:15:    path: Assets/Scenes/LoadingShell.unity
+step01_diagnostics.patch:57:         var flow = FindObjectOfType<PunStagingFlow>();
+step01_diagnostics.patch:58:         Debug.Log($"[Diag] PunStagingFlow in scene = {(flow != null ? "YES" : "NO")}");
+step02_bootstrap_shim_loader.patch:13:+/// - PunStagingFlow_Shim ã¨ LoadingShellAutoLoader ã‚’å¿…ãšã‚¢ã‚¿ãƒƒãƒ
+step02_bootstrap_shim_loader.patch:30:+        // 2) PunStagingFlow_Shim ã‚’å¿…ãšè¼‰ã›ã‚‹
+step02_bootstrap_shim_loader.patch:31:+        var shim = Object.FindObjectOfType<PunStagingFlow_Shim>();
+step02_bootstrap_shim_loader.patch:34:+            shim = surfaceGo.GetComponent<PunStagingFlow_Shim>();
+step02_bootstrap_shim_loader.patch:35:+            if (shim == null) shim = surfaceGo.AddComponent<PunStagingFlow_Shim>();
+step02_bootstrap_shim_loader.patch:38:+        // 3) LoadingShellAutoLoader ã‚’å¿…ãšè¼‰ã›ã‚‹
+step02_bootstrap_shim_loader.patch:39:+        var auto = Object.FindObjectOfType<LoadingShellAutoLoader>();
+step02_bootstrap_shim_loader.patch:42:+            auto = surfaceGo.GetComponent<LoadingShellAutoLoader>();
+step02_bootstrap_shim_loader.patch:43:+            if (auto == null) auto = surfaceGo.AddComponent<LoadingShellAutoLoader>();
+step02b_beacon_trace.patch:68:diff --git a/Assets/Scripts/StageFlow/LoadingShellAutoLoader.cs b/Assets/Scripts/StageFlow/LoadingShellAutoLoader.cs
+step02b_beacon_trace.patch:72:+++ b/Assets/Scripts/StageFlow/LoadingShellAutoLoader.cs
+step02b_beacon_trace.patch:80:+/// ãƒ«ãƒ¼ãƒ ã« gm_plan ãŒå…¥ã£ã¦ã„ã‚Œã° LoadingShell ã‚’å¿…ãšçµŒç”±ã•ã›ã‚‹ã‚·ãƒ³ãƒ—ãƒ«ãƒ­ãƒ¼ãƒ€ãƒ¼ã€‚
+step02b_beacon_trace.patch:83:+public static class LoadingShellAutoLoader
+step02b_beacon_trace.patch:95:+        // ã™ã§ã« LoadingShell ã«å±…ã‚‹ãªã‚‰ä½•ã‚‚ã—ãªã„
+step02b_beacon_trace.patch:97:+        if (active == "LoadingShell") return;
+step02b_beacon_trace.patch:99:+        Debug.Log("[AutoLoader] gm_plan detected -> Load LoadingShell");
+step02b_beacon_trace.patch:100:+        SceneManager.LoadScene("LoadingShell", LoadSceneMode.Single);
+step02b_force_bootstrap_and_beacon.patch:17:+    /// - PunStagingFlow_Shim ã¨ LoadingShellAutoLoader ã‚’å¿…ãšã‚¢ã‚¿ãƒƒãƒ
+step02b_force_bootstrap_and_beacon.patch:40:+            // 3) PunStagingFlow_Shim ã‚’ç¢ºå®Ÿã«è¼‰ã›ã‚‹
+step02b_force_bootstrap_and_beacon.patch:41:+            if (Object.FindObjectOfType<PunStagingFlow_Shim>() == null)
+step02b_force_bootstrap_and_beacon.patch:43:+                if (surface.GetComponent<PunStagingFlow_Shim>() == null)
+step02b_force_bootstrap_and_beacon.patch:44:+                    surface.AddComponent<PunStagingFlow_Shim>();
+step02b_force_bootstrap_and_beacon.patch:47:+            // 4) LoadingShellAutoLoader ã‚‚ç¢ºå®Ÿã«è¼‰ã›ã‚‹
+step02b_force_bootstrap_and_beacon.patch:48:+            if (Object.FindObjectOfType<LoadingShellAutoLoader>() == null)
+step02b_force_bootstrap_and_beacon.patch:50:+                if (surface.GetComponent<LoadingShellAutoLoader>() == null)
+step02b_force_bootstrap_and_beacon.patch:51:+                    surface.AddComponent<LoadingShellAutoLoader>();
+step02b_force_bootstrap_and_beacon.patch:65:diff --git a/Assets/Scripts/Net/GameFlow2/LoadingShellAutoLoader.cs b/Assets/Scripts/Net/GameFlow2/LoadingShellAutoLoader.cs
+step02b_force_bootstrap_and_beacon.patch:69:+++ b/Assets/Scripts/Net/GameFlow2/LoadingShellAutoLoader.cs
+step02b_force_bootstrap_and_beacon.patch:77:+    /// LoadingShell ã«å…¥ã£ãŸã‚‰ã€æ¬¡ã®ã‚¹ãƒ†ãƒ¼ã‚¸ã¸é€²ã‚ã‚‹ãŸã‚ã®æœ€å°ã‚ªãƒ¼ãƒˆãƒ­ãƒ¼ãƒ€ï¼ˆè©³ç´°ãƒ­ã‚¸ãƒƒã‚¯ã¯æ—¢å­˜ã®ã¾ã¾ï¼‰ã€‚
+step02b_force_bootstrap_and_beacon.patch:80:+    public sealed class LoadingShellAutoLoader : MonoBehaviour
+step02b_force_bootstrap_and_beacon.patch:96:+            // ã“ã“ã§ã¯ã€ŒLoadingShellåˆ°é”ã®æ¤œçŸ¥ã€ã ã‘ã‚’æ‹…å½“ï¼ˆè©³ç´°ãªé·ç§»ã¯æ—¢å­˜ã®ä»•çµ„ã¿ã«å§”è­²ï¼‰
+step02b_force_bootstrap_and_beacon.patch:97:+            if (scene.name == "LoadingShell")
+step02b_force_bootstrap_and_beacon.patch:99:+                // ä»¥é™ã®é€²è¡Œã¯PunStagingFlow_Shimå´ã®æ—¢å­˜ãƒ­ã‚¸ãƒƒã‚¯ãŒæ‹¾ã†æƒ³å®š
+step02b_force_bootstrap_and_beacon.patch:115:+/// ã‚·ãƒ¼ãƒ³ãƒ­ãƒ¼ãƒ‰ã”ã¨ã« LobbyWhileInRoomGuard.autoFix ã‚’ true ã«ä¿ã¤ã€‚
+step02b_force_bootstrap_and_beacon.patch:130:+        var guards = Object.FindObjectsOfType<LobbyWhileInRoomGuard>();
+step02c_beacon_bootstrap.patch:17:+    // â˜…æ—¢å­˜ã® SceneLoadWatchdog ã¨åŒã˜å‡ºåŠ›ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã«åˆã‚ã›ã‚‹
+step_fix_staging_surface.patch:27:+    public const string LOADING_SHELL = "LoadingShell";
+step_fix_staging_surface.patch:29:diff --git a/Assets/Scripts/Net/GameFlowV2/PunStagingFlow_Shim.cs b/Assets/Scripts/Net/GameFlowV2/PunStagingFlow_Shim.cs
+step_fix_staging_surface.patch:33:+++ b/Assets/Scripts/Net/GameFlowV2/PunStagingFlow_Shim.cs
+step_fix_staging_surface.patch:45:+// æ—¢å­˜ã‚³ãƒ¼ãƒ‰ãŒå‘¼ã¶ "PunStagingFlow" ã¾ã‚ã‚Šã®APIã‚’å—ã‘æ­¢ã‚ã€
+step_fix_staging_surface.patch:48:+public static class PunStagingFlow_Shim
+step_fix_staging_surface.patch:53:+    public static void SetPlanOnly(this PunStagingFlow _ignored, List<string> plan)
+step_fix_staging_surface.patch:68:+    public static void SetPlanAndStart(this PunStagingFlow flow, List<string> plan)
+step_fix_staging_surface.patch:76:+    public static void SetReadyFromUI(this PunStagingFlow _ignored, bool isReady)
+step_fix_staging_surface.patch:84:+    public static void TryStartByReady(this PunStagingFlow _ignored)
+step_fix_staging_surface.patch:94:+        // çŠ¶æ…‹ã‚’ "loading" ã«ã—ã¦ LoadingShell ã¸
+step_fix_staging_surface.patch:144:diff --git a/Assets/Scripts/StageFlow/LoadingShellAutoLoader.cs b/Assets/Scripts/StageFlow/LoadingShellAutoLoader.cs
+step_fix_staging_surface.patch:148:+++ b/Assets/Scripts/StageFlow/LoadingShellAutoLoader.cs
+step_fix_staging_surface.patch:160:+// LoadingShell ã«å…¥ã£ãŸMasterãŒã€ãƒ«ãƒ¼ãƒ ã® gm_plan / gm_index ã‚’è¦‹ã¦
+step_fix_staging_surface.patch:163:+public class LoadingShellAutoLoader : MonoBehaviour
+step_fix_staging_surface.patch:178:+        var go = new GameObject("LoadingShellAutoLoader");
+step_fix_staging_surface.patch:180:+        go.AddComponent<LoadingShellAutoLoader>().Kick();
+step_fix_staging_surface.patch:217:+            Note($"LoadingShell->Load '{next}' (idx={idx})");

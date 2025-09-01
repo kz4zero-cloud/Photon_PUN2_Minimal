@@ -1,0 +1,37 @@
+Assets/Photon/PhotonUnityNetworking/Code/PhotonHandler.cs:264:            PhotonNetwork.LoadLevelIfSynced();
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:496:        /// To synchronize the loaded level, the Master Client should use PhotonNetwork.LoadLevel, which
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs:2112:                    PhotonNetwork.LoadLevel((int)sceneId);
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs:2119:                    PhotonNetwork.LoadLevel((string)sceneId);
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs:2495:                        PhotonNetwork.LoadLevelIfSynced();
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs.bak:2112:                    PhotonNetwork.LoadLevel((int)sceneId);
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs.bak:2119:                    PhotonNetwork.LoadLevel((string)sceneId);
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs.bak:2495:                        PhotonNetwork.LoadLevelIfSynced();
+Assets/Photon/PhotonUnityNetworking/Demos/DemoAsteroids/Scripts/Lobby/LobbyMainPanel.cs:275:            PhotonNetwork.LoadLevel("DemoAsteroids-GameScene");
+Assets/Photon/PhotonUnityNetworking/Demos/DemoAsteroids/Scripts/Lobby/LobbyMainPanel.cs.bak:275:            PhotonNetwork.LoadLevel("DemoAsteroids-GameScene");
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/GameManager.cs:181:			PhotonNetwork.LoadLevel("PunBasics-Room for "+PhotonNetwork.CurrentRoom.PlayerCount);
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/GameManager.cs.bak:181:			PhotonNetwork.LoadLevel("PunBasics-Room for "+PhotonNetwork.CurrentRoom.PlayerCount);
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/Launcher.cs:74:			// this makes sure we can use PhotonNetwork.LoadLevel() on the master client and all clients in the same room sync their level automatically
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/Launcher.cs:218:				PhotonNetwork.LoadLevel("PunBasics-Room for 1");
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/Launcher.cs.bak:74:			// this makes sure we can use PhotonNetwork.LoadLevel() on the master client and all clients in the same room sync their level automatically
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/Launcher.cs.bak:218:				PhotonNetwork.LoadLevel("PunBasics-Room for 1");
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/PunCockpit.cs:427:			PhotonNetwork.LoadLevel(level);
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/PunCockpit.cs.bak:427:			PhotonNetwork.LoadLevel(level);
+Assets/Photon/PhotonUnityNetworking/changelog.txt:249:Changed: PhotonNetwork.LoadLevel() methods will skip loading, if PhotonHandler.AppQuits is true. This avoids a minor issue in the Editor when a script loads a scene in OnLeftRoom() while ending playmode.
+Assets/Photon/PhotonUnityNetworking/changelog.txt:466:Internal: SetLevelInPropsIfSynced() is now called in NewSceneLoaded() under the condition that PUN was not causing the scene-load. So it's not called when the scene loaded via PhotonNetwork.LoadScene.
+Assets/Scripts/Minigame/Proto/GameProtoReturnUI.cs.bak:17:            PhotonNetwork.LoadLevel("Main");
+Assets/Scripts/Minigame/Proto/GameProtoReturnUI.cs.bak:31:        PhotonNetwork.LoadLevel("Main");
+Assets/Scripts/Net/GameFlow/AllReadyCountdown.cs.bak:107:            PhotonNetwork.LoadLevel(sceneName);
+Assets/Scripts/Net/GameFlow/GameRoundController.cs.bak:48:        PhotonNetwork.LoadLevel("Main");
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:98:                    PhotonNetwork.LoadLevel(sceneName);
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs.bak:137:        PhotonNetwork.LoadLevel(sceneName);
+Assets/Scripts/Net/GameFlow/RoundEndHub.cs.bak:24:            PhotonNetwork.LoadLevel("Main");
+Assets/Scripts/Net/GameFlow/RoundEndHub.cs.bak:38:        PhotonNetwork.LoadLevel("Main");
+Assets/Scripts/Net/PunLobbyUI.cs.bak:154:        PhotonNetwork.LoadLevel("Main");
+Assets/Scripts/Net/Tools/LobbyWhileInRoomGuard.cs:30:            // 自動同期がONなら PhotonNetwork.LoadLevel を推奨
+Assets/Scripts/Net/Tools/LobbyWhileInRoomGuard.cs.bak:30:            // ����������ON�Ȃ� PhotonNetwork.LoadLevel �𐄏�
+Assets/Scripts/Net/Tools/LobbyWhileInRoomGuard.cs.bak:31:            PhotonNetwork.LoadLevel(mainSceneName);
+Assets/Scripts/Net/Tools/SceneLoadGate.cs:18:            PhotonNetwork.LoadLevel(sceneName);        // 違う時だけロード
+Assets/Scripts/Net/Tools/SceneLoadGate.cs.bak:32:            PhotonNetwork.LoadLevel(sceneName);
+step_fix_staging_surface.patch:122:+            PhotonNetwork.LoadLevel(scene);
+step_fix_staging_surface.patch:161:+// 次のステージを PhotonNetwork.LoadLevel するだけの小さな自動化。
+step_fix_staging_surface.patch:216:+            PhotonNetwork.LoadLevel(next);

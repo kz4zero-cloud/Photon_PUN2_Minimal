@@ -1,0 +1,55 @@
+Assets/Photon/PhotonRealtime/Code/LoadBalancingClient.cs:2204:                    this.InRoomCallbackTargets.OnPlayerPropertiesUpdate(target, actorProperties);
+Assets/Photon/PhotonRealtime/Code/LoadBalancingClient.cs:2299:                this.InRoomCallbackTargets.OnRoomPropertiesUpdate(gameProperties);
+Assets/Photon/PhotonRealtime/Code/LoadBalancingClient.cs:2365:                    this.InRoomCallbackTargets.OnRoomPropertiesUpdate(gameProperties);
+Assets/Photon/PhotonRealtime/Code/LoadBalancingClient.cs:2380:                        this.InRoomCallbackTargets.OnPlayerPropertiesUpdate(target, props);
+Assets/Photon/PhotonRealtime/Code/LoadBalancingClient.cs:4138:        /// are not filtered out for the OnRoomPropertiesUpdate callback.
+Assets/Photon/PhotonRealtime/Code/LoadBalancingClient.cs:4145:        void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged);
+Assets/Photon/PhotonRealtime/Code/LoadBalancingClient.cs:4155:        void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps);
+Assets/Photon/PhotonRealtime/Code/LoadBalancingClient.cs:4511:        public void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Photon/PhotonRealtime/Code/LoadBalancingClient.cs:4517:                target.OnRoomPropertiesUpdate(propertiesThatChanged);
+Assets/Photon/PhotonRealtime/Code/LoadBalancingClient.cs:4521:        public void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProp)
+Assets/Photon/PhotonRealtime/Code/LoadBalancingClient.cs:4527:                target.OnPlayerPropertiesUpdate(targetPlayer, changedProp);
+Assets/Photon/PhotonRealtime/Code/Player.cs:397:                    this.RoomReference.LoadBalancingClient.InRoomCallbackTargets.OnPlayerPropertiesUpdate(this, customProps);
+Assets/Photon/PhotonRealtime/Code/Room.cs:427:                this.LoadBalancingClient.InRoomCallbackTargets.OnRoomPropertiesUpdate(propertiesToSet);
+Assets/Photon/PhotonRealtime/Code/SupportLogger.cs:382:        public void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Photon/PhotonRealtime/Code/SupportLogger.cs:384:			Debug.Log(this.GetFormattedTimestamp() + " SupportLogger OnRoomPropertiesUpdate(propertiesThatChanged).");
+Assets/Photon/PhotonRealtime/Code/SupportLogger.cs:387:        public void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+Assets/Photon/PhotonRealtime/Code/SupportLogger.cs:389:			Debug.Log(this.GetFormattedTimestamp() + " SupportLogger OnPlayerPropertiesUpdate(targetPlayer,changedProps).");
+Assets/Photon/PhotonUnityNetworking/Code/PhotonHandler.cs:262:        public void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Photon/PhotonUnityNetworking/Code/PhotonHandler.cs:268:        public void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps) { }
+Assets/Photon/PhotonUnityNetworking/Code/PunClasses.cs:328:        public virtual void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Photon/PhotonUnityNetworking/Code/PunClasses.cs:341:        public virtual void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+Assets/Photon/PhotonUnityNetworking/Demos/DemoAsteroids/Scripts/Game/AsteroidsGameManager.cs:139:        public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+Assets/Photon/PhotonUnityNetworking/Demos/DemoAsteroids/Scripts/Game/PlayerOverviewPanel.cs:60:        public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+Assets/Photon/PhotonUnityNetworking/Demos/DemoAsteroids/Scripts/Lobby/LobbyMainPanel.cs:185:        public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+Assets/Photon/PhotonUnityNetworking/Demos/DemoAsteroids/Scripts/Lobby/LobbyMainPanel.cs.bak:185:        public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+Assets/Photon/PhotonUnityNetworking/Demos/DemoProcedural/Scripts/Cluster.cs:167:        public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Photon/PhotonUnityNetworking/Demos/DemoProcedural/Scripts/IngameControlPanel.cs:187:        public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/PunCockpit.cs:706:        public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/PunCockpit.cs:708:			if (debug) Debug.Log("PunCockpit:OnRoomPropertiesUpdate() " + propertiesThatChanged.ToStringFull());
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/PunCockpit.cs.bak:706:        public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/PunCockpit.cs.bak:708:			if (debug) Debug.Log("PunCockpit:OnRoomPropertiesUpdate() " + propertiesThatChanged.ToStringFull());
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/Scripts/Controllers/PlayerDetailsController.cs:156:        public override void OnPlayerPropertiesUpdate(Player target, ExitGames.Client.Photon.Hashtable changedProps)
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/Scripts/Controllers/PlayerDetailsController.cs:158:            //Debug.Log("OnPlayerPropertiesUpdate " + target.ActorNumber + " " + target.ToStringFull() + " " + changedProps.ToStringFull());
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/Scripts/Lists/PlayerListView.cs:104:        public override void OnPlayerPropertiesUpdate(Player target, ExitGames.Client.Photon.Hashtable changedProps)
+Assets/Photon/PhotonUnityNetworking/UtilityScripts/PhotonPlayer/PhotonTeamsManager.cs:151:        void IInRoomCallbacks.OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+Assets/Photon/PhotonUnityNetworking/UtilityScripts/PhotonPlayer/PhotonTeamsManager.cs:485:        void IInRoomCallbacks.OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Photon/PhotonUnityNetworking/UtilityScripts/PhotonPlayer/PlayerNumbering.cs:109:        public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+Assets/Photon/PhotonUnityNetworking/UtilityScripts/PhotonPlayer/PunTeams.cs:84:        public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+Assets/Photon/PhotonUnityNetworking/UtilityScripts/Room/CountdownTimer.cs:113:        public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Photon/PhotonUnityNetworking/UtilityScripts/Room/CountdownTimer.cs:115:            Debug.Log("CountdownTimer.OnRoomPropertiesUpdate " + propertiesThatChanged.ToStringFull());
+Assets/Photon/PhotonUnityNetworking/UtilityScripts/TurnBased/PunTurnManager.cs:266:        public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Photon/PhotonUnityNetworking/UtilityScripts/TurnBased/PunTurnManager.cs:269:            //   Debug.Log("OnRoomPropertiesUpdate: "+propertiesThatChanged.ToStringFull());
+Assets/Photon/PhotonUnityNetworking/changelog.txt:482:Changed: The callbacks OnRoomPropertiesUpdate and OnPlayerPropertiesUpdate are not called when/before entering a room. It was the case whenever properties change, which is also the case when the Realtime API constructs the room or the player (with properties). Wait for OnJoinedRoom and check properties the first time when that's called.
+Assets/Scripts/Net/GameFlow/AllReadyCountdown.cs:32:    public override void OnRoomPropertiesUpdate(Hashtable props) { Reevaluate("RoomProps"); }
+Assets/Scripts/Net/GameFlow/AllReadyCountdown.cs:33:    public override void OnPlayerPropertiesUpdate(Player t, Hashtable c)
+Assets/Scripts/Net/GameFlow/AllReadyCountdown.cs.bak:32:    public override void OnRoomPropertiesUpdate(Hashtable props) { Reevaluate("RoomProps"); }
+Assets/Scripts/Net/GameFlow/AllReadyCountdown.cs.bak:33:    public override void OnPlayerPropertiesUpdate(Player t, Hashtable c)
+Assets/Scripts/Net/GameFlow/MainStagingReset.cs:83:    public override void OnPlayerPropertiesUpdate(Player target, Hashtable changed)
+Assets/Scripts/Net/GameFlow/PunGameFlow.cs:207:    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:69:    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:71:        Debug.Log("[Diag][PunStagingFlow] OnRoomPropertiesUpdate keys=" +
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:108:    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs:110:        Debug.Log("[Diag][PunStagingFlow] OnPlayerPropertiesUpdate player=" +
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs.bak:173:    public override void OnPlayerPropertiesUpdate(Player target, Hashtable changedProps)
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs.bak:218:    public override void OnRoomPropertiesUpdate(Hashtable changed)

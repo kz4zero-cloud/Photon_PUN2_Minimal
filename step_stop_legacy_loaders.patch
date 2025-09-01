@@ -1,0 +1,117 @@
+diff --git a/Assets/Scripts/Net/GameFlowV2/LegacySuppressor.cs b/Assets/Scripts/Net/GameFlowV2/LegacySuppressor.cs
+new file mode 100644
+index 0000000..abcd123
+--- /dev/null
++++ b/Assets/Scripts/Net/GameFlowV2/LegacySuppressor.cs
+@@ -0,0 +1,170 @@
++using System;
++using System.IO;
++using System.Linq;
++using System.Collections;
++using UnityEngine;
++using Photon.Pun;
++
++namespace Net.GameFlowV2
++{
++    /// <summary>
++    /// 起動直後に「競合しやすいローダ/ウォッチャ」を無効化して、
++    /// AutoSync を確実に 1 箇所で ON にするための安全ネット。
++    /// 既存コードを直接触らず、1 ファイル追加だけで効果を出す。
++    /// 出力は Application.persistentDataPath/staging_suppressor.log のみ（Console/HUDは使わない）
++    /// </summary>
++    public class LegacySuppressor : MonoBehaviour
++    {
++        private static readonly string[] Suspects =
++        {
++            // ロード/監視に関わる既知の候補（存在しない型は無視）
++            "SceneLoadWatchdog",
++            "RunAssertRuntime",
++            "AllReadyCountdown",
++            "StageRunStarter",
++            "ReadyDebugHotkeys",
++            "LoadingShellController",
++            "LoadingShellAutoLoader",
++            "StageRuntime",
++            "SceneLoadGate",
++            "PunGameFlow",
++            "RoomReturn",
++            "PunReturnToLobby",
++            // AutoSync を明示的に OFF にする可能性
++            "AutoSceneSyncOff",
++        };
++
++        private static string LogPath =>
++            Path.Combine(Application.persistentDataPath, "staging_suppressor.log");
++
++        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
++        private static void Install()
++        {
++            var go = new GameObject("LegacySuppressor__Auto");
++            DontDestroyOnLoad(go);
++            go.hideFlags = HideFlags.DontSave;
++            go.AddComponent<LegacySuppressor>();
++        }
++
++        private IEnumerator Start()
++        {
++            // できるだけ早く AutoSync を統一（PUN未初期化でも例外は無視）
++            try { PhotonNetwork.AutomaticallySyncScene = true; }
++            catch { }
++
++            // 1フレーム待って、シーン上の全コンポーネントが出揃ってから無効化へ
++            yield return null;
++
++            SafeWrite("=== LegacySuppressor begin ===");
++            SafeWrite($"scene={UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
++
++            foreach (var typeName in Suspects)
++            {
++                var t = Type.GetType(typeName) ??
++                        AppDomain.CurrentDomain.GetAssemblies()
++                          .Select(a => a.GetType(typeName))
++                          .FirstOrDefault(x => x != null);
++                if (t == null) continue;
++
++                UnityEngine.Object[] found;
++                try { found = FindObjectsOfType(t, true); }
++                catch { continue; }
++
++                foreach (var obj in found)
++                {
++                    if (obj is Behaviour b && b.enabled)
++                    {
++                        b.enabled = false;
++                        SafeWrite($"disabled {typeName} on {b.name}");
++                    }
++                }
++            }
++
++            // 念のため、PUN準備後にもう一度 AutoSync を強制
++            yield return EnsureAutoSync();
++            SafeWrite("=== LegacySuppressor end ===");
++        }
++
++        private IEnumerator EnsureAutoSync()
++        {
++            var timeout = Time.realtimeSinceStartup + 5f;
++            while (!PhotonNetwork.IsConnectedAndReady && Time.realtimeSinceStartup < timeout)
++                yield return null;
++
++            try
++            {
++                PhotonNetwork.AutomaticallySyncScene = true;
++                SafeWrite("AutoSync enforced (final)");
++            }
++            catch { }
++        }
++
++        private static void SafeWrite(string line)
++        {
++            try
++            {
++                File.AppendAllText(LogPath, $"{DateTime.Now:HH:mm:ss} {line}\n");
++            }
++            catch { /* 失敗しても落とさない */ }
++        }
++    }
++}

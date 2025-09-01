@@ -1,0 +1,27 @@
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:3042:        /// LoadLevel uses SceneManager.LoadSceneAsync().
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:3068:            _AsyncLevelLoadingOperation = SceneManager.LoadSceneAsync(levelNumber,LoadSceneMode.Single);
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:3084:        /// LoadLevel uses SceneManager.LoadSceneAsync().
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:3110:            _AsyncLevelLoadingOperation = SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Single);
+Assets/Photon/PhotonUnityNetworking/Demos/DemoAsteroids/Scripts/Game/AsteroidsGameManager.cs:118:            UnityEngine.SceneManagement.SceneManager.LoadScene("DemoAsteroids-LobbyScene");
+Assets/Photon/PhotonUnityNetworking/Demos/DemoHub/Scripts/DemoHubManager.cs:158:			SceneManager.LoadScene(_data[currentSelection].Scene);
+Assets/Photon/PhotonUnityNetworking/Demos/DemoHub/Scripts/ToDemoHubButton.cs:93:			SceneManager.LoadScene(0);
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/GameManager.cs:57:				SceneManager.LoadScene("PunBasics-Launcher");
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/GameManager.cs:150:			SceneManager.LoadScene("PunBasics-Launcher");
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/GameManager.cs.bak:57:				SceneManager.LoadScene("PunBasics-Launcher");
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/GameManager.cs.bak:150:			SceneManager.LoadScene("PunBasics-Launcher");
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/Scripts/ThirdParty/PunCockpitEmbed.cs:53:            SceneManager.LoadScene(PunCockpit_scene, LoadSceneMode.Additive);
+Assets/Scripts/Debug/RunAssertRuntime.cs:46:                SceneManager.LoadScene(loadingShellScene, LoadSceneMode.Single);
+Assets/Scripts/Net/GameFlow/PunGameFlow.cs:44:            UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
+Assets/Scripts/Net/RoomReturn.cs:57:            SceneManager.LoadScene(lobbySceneName);
+Assets/Scripts/PunReturnToLobby.cs:17:            SceneManager.LoadScene("Lobby"); // ”O‚Ì‚½‚ß
+Assets/Scripts/PunReturnToLobby.cs:24:        SceneManager.LoadScene("Lobby");
+Assets/Scripts/PunReturnToLobby.cs:31:        SceneManager.LoadScene("Lobby");
+Assets/Scripts/StageFlow/LoadingShellController.cs:52:            SceneManager.LoadScene(nextScene);
+Assets/Scripts/StageFlow/StageRunStarter.cs:30:        SceneManager.LoadScene(loadingShellScene, LoadSceneMode.Single);
+Assets/Scripts/StageFlow/StageRuntime.cs:31:            SceneManager.LoadScene("Main", LoadSceneMode.Single);
+Assets/Scripts/StageFlow/StageRuntime.cs:38:            SceneManager.LoadScene("Main", LoadSceneMode.Single);
+Assets/Scripts/StageFlow/StageRuntime.cs:45:        SceneManager.LoadScene(nextStage, LoadSceneMode.Single);
+Assets/Scripts/StageFlow/StageRuntime.cs:57:            SceneManager.LoadScene("Main", LoadSceneMode.Single);
+Assets/Scripts/StageFlow/StageRuntime.cs:64:            SceneManager.LoadScene("Main", LoadSceneMode.Single);
+Assets/Scripts/StageFlow/StageRuntime.cs:71:        SceneManager.LoadScene(currentStage, LoadSceneMode.Single);
+step02b_beacon_trace.patch:100:+        SceneManager.LoadScene("LoadingShell", LoadSceneMode.Single);

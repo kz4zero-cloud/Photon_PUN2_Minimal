@@ -1,0 +1,12 @@
+* 6949009 step02b: Beacon writes to persistent & Desktop; minimal autoloader guards
+* 73ca780 fix(step02c): guaranteed beacon writer (file-only; no console/HUD)
+* 2f98994 step02b: fix namespace, force bootstrap (shim+autoLoader) and write file beacon; always-on lobby guard
+* 812b41f step02: bootstrap stable staging surface (shim + auto loader) and enable scene autosync
+* cfea191 fix(step02): add BootstrapShimLoader to always spawn PunStagingFlow_Shim and enable AutoSyncScene (no console/HUD)
+* b41e898 step02: bootstrap shim/loader & guard autofix (no scene edits)
+* 3d23d10 feat: start only when all ready & plan exists; Master sync-loads LoadingShell (no console/HUD)
+* f73d8d6 fix: add stable staging surface (shim) and LoadingShell auto loader; no console/HUD
+* 5bff6af step01b: force PunDiagLogger bootstrap (BeforeSceneLoad + SubsystemRegistration)
+* 9b458f8 step01: add Photon diagnostics logger (no behavior change)
+* 86b74e9 feat: PlayerPrefabDoctor 追加＆ステージ起動周りの整備
+* b951710 Initial commit

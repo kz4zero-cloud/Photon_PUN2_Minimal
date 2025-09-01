@@ -1,0 +1,39 @@
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:508:        public static bool AutomaticallySyncScene
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:3034:        /// To sync the loaded level in a room, set PhotonNetwork.AutomaticallySyncScene to true.
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:3047:        /// If AutomaticallySyncScene is enabled, PUN cancels the previous load (and prevent that from
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:3048:        /// becoming the active scene). If AutomaticallySyncScene is off, the previous scene loading can finish.
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:3061:            if (PhotonNetwork.AutomaticallySyncScene)
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:3076:        /// To sync the loaded level in a room, set PhotonNetwork.AutomaticallySyncScene to true.
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:3089:        /// If AutomaticallySyncScene is enabled, PUN cancels the previous load (and prevent that from
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:3090:        /// becoming the active scene). If AutomaticallySyncScene is off, the previous scene loading can finish.
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetwork.cs:3103:            if (PhotonNetwork.AutomaticallySyncScene)
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs:2092:        /// <summary>Internally used to detect the current scene and load it if PhotonNetwork.AutomaticallySyncScene is enabled.</summary>
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs:2095:            if (!PhotonNetwork.AutomaticallySyncScene || PhotonNetwork.IsMasterClient || PhotonNetwork.CurrentRoom == null)
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs:2127:            if (!PhotonNetwork.AutomaticallySyncScene || !PhotonNetwork.IsMasterClient || PhotonNetwork.CurrentRoom == null)
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs.bak:2092:        /// <summary>Internally used to detect the current scene and load it if PhotonNetwork.AutomaticallySyncScene is enabled.</summary>
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs.bak:2095:            if (!PhotonNetwork.AutomaticallySyncScene || PhotonNetwork.IsMasterClient || PhotonNetwork.CurrentRoom == null)
+Assets/Photon/PhotonUnityNetworking/Code/PhotonNetworkPart.cs.bak:2127:            if (!PhotonNetwork.AutomaticallySyncScene || !PhotonNetwork.IsMasterClient || PhotonNetwork.CurrentRoom == null)
+Assets/Photon/PhotonUnityNetworking/Demos/DemoAsteroids/Scripts/Lobby/LobbyMainPanel.cs:48:            PhotonNetwork.AutomaticallySyncScene = true;
+Assets/Photon/PhotonUnityNetworking/Demos/DemoAsteroids/Scripts/Lobby/LobbyMainPanel.cs.bak:48:            PhotonNetwork.AutomaticallySyncScene = true;
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/Launcher.cs:75:			PhotonNetwork.AutomaticallySyncScene = true;
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/Launcher.cs:211:			// #Critical: We only load if we are the first player, else we rely on  PhotonNetwork.AutomaticallySyncScene to sync our instance scene.
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/Launcher.cs.bak:75:			PhotonNetwork.AutomaticallySyncScene = true;
+Assets/Photon/PhotonUnityNetworking/Demos/PunBasics-Tutorial/Scripts/Launcher.cs.bak:211:			// #Critical: We only load if we are the first player, else we rely on  PhotonNetwork.AutomaticallySyncScene to sync our instance scene.
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/Scripts/Autonomous UI/AutoSyncSceneToggle.cs:14:	/// PhotonNetwork.AutomaticallySyncScene UI Toggle
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/Scripts/Autonomous UI/AutoSyncSceneToggle.cs:48:			if (PhotonNetwork.AutomaticallySyncScene != _toggle.isOn)
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/Scripts/Autonomous UI/AutoSyncSceneToggle.cs:50:				_toggle.isOn = PhotonNetwork.AutomaticallySyncScene;
+Assets/Photon/PhotonUnityNetworking/Demos/PunCockpit/Scripts/Autonomous UI/AutoSyncSceneToggle.cs:57:			PhotonNetwork.AutomaticallySyncScene = value;
+Assets/Scripts/Net/GameFlow/PunStagingFlow.cs.bak:25:        PhotonNetwork.AutomaticallySyncScene = true;
+Assets/Scripts/Net/PunBootstrap.cs:16:        PhotonNetwork.AutomaticallySyncScene = true;
+Assets/Scripts/Net/PunLobbyUI.cs:56:        PhotonNetwork.AutomaticallySyncScene = true;
+Assets/Scripts/Net/PunLobbyUI.cs.bak:56:        PhotonNetwork.AutomaticallySyncScene = true;
+Assets/Scripts/Net/Tools/AutoSceneSyncOff.cs:10:        PhotonNetwork.AutomaticallySyncScene = false;
+step01_diagnostics.patch:55:-        Debug.Log($"[Diag] OnEnable scene={scene} inRoom={PhotonNetwork.InRoom} autoSync={PhotonNetwork.AutomaticallySyncScene}");
+step01_diagnostics.patch:56:+        Debug.Log($"[Diag] OnEnable scene={scene} inRoom={PhotonNetwork.InRoom} autoSync={PhotonNetwork.AutomaticallySyncScene}");
+step02_bootstrap_shim_loader.patch:14:+/// - PhotonNetwork.AutomaticallySyncScene を有効化
+step02_bootstrap_shim_loader.patch:47:+        PhotonNetwork.AutomaticallySyncScene = true;
+step02b_beacon_trace.patch:31:+            string header = $"[BOOT] {now} scene={scene} inRoom={PhotonNetwork.InRoom} autoSync={PhotonNetwork.AutomaticallySyncScene}";
+step02b_force_bootstrap_and_beacon.patch:18:+    /// - PhotonNetwork.AutomaticallySyncScene を ON
+step02b_force_bootstrap_and_beacon.patch:30:+            PhotonNetwork.AutomaticallySyncScene = true;
+step_fix_staging_surface.patch:92:+        PhotonNetwork.AutomaticallySyncScene = true;
+step_fix_staging_surface.patch:215:+            PhotonNetwork.AutomaticallySyncScene = true;
