@@ -1,0 +1,128 @@
+diff --git a/Assets/Scripts/Debug/FileLog.cs b/Assets/Scripts/Debug/FileLog.cs
+new file mode 100644
+index 0000000..a1b2c3d
+--- /dev/null
++++ b/Assets/Scripts/Debug/FileLog.cs
+@@ -0,0 +1,110 @@
++using System;
++using System.IO;
++using System.Text;
++using UnityEngine;
++
++/// <summary>
++/// すべてのログの既定出力先をデスクトップの「game\\デバッグログ」に統一するための軽量ヘルパ。
++/// - FileLog.Append("category", "message") で category.log に追記
++/// - FileLog.PathFor("name") で任意ファイルパスを取得
++/// - Console/HUD には依存しない
++/// </summary>
++public static class FileLog
++{
++    // 既定のルート（ユーザ指定）
++    public static readonly string Root =
++        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), "game", "デバッグログ");
++
++    private static readonly object _lock = new object();
++    private static bool _inited;
++
++    private static void Ensure()
++    {
++        if (_inited) return;
++        Directory.CreateDirectory(Root);
++        _inited = true;
++    }
++
++    public static string PathFor(string name)
++    {
++        Ensure();
++        return Path.Combine(Root, name);
++    }
++
++    public static void Append(string category, string line)
++    {
++        Ensure();
++        var path = Path.Combine(Root, $"{category}.log");
++        AppendRaw(path, line);
++    }
++
++    public static void AppendRaw(string path, string line)
++    {
++        Ensure();
++        var ts = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff");
++        var payload = $"{ts} {line}\n";
++        lock (_lock)
++        {
++            using var fs = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
++            using var sw = new StreamWriter(fs, new UTF8Encoding(false));
++            sw.Write(payload);
++        }
++    }
++}
+diff --git a/Assets/Scripts/Debug/GlobalFileLogger.cs b/Assets/Scripts/Debug/GlobalFileLogger.cs
+new file mode 100644
+index 0000000..b4c3d5e
+--- /dev/null
++++ b/Assets/Scripts/Debug/GlobalFileLogger.cs
+@@ -0,0 +1,109 @@
++using System;
++using UnityEngine;
++
++/// <summary>
++/// Unity の全 Debug.Log/Warning/Error をデスクトップ配下に自動ミラーするグローバルロガー。
++/// - Application.logMessageReceivedThreaded にフック
++/// - 出力先: C:\Users\...\Desktop\game\デバッグログ\unity_capture.log
++/// - Console/HUDを見なくてもファイルで全て追える
++/// </summary>
++public static class GlobalFileLogger
++{
++    private static bool _installed;
++    private const string CaptureFile = "unity_capture.log";
++
++    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
++    private static void Subsystem()
++    {
++        Install();
++        // 起動印を一度だけ
++        SafeWrite($"[boot] subsystem PID={System.Diagnostics.Process.GetCurrentProcess().Id}");
++    }
++
++    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
++    private static void BeforeScene()
++    {
++        Install();
++        var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
++        SafeWrite($"[boot] beforeSceneLoad scene={scene}");
++    }
++
++    private static void Install()
++    {
++        if (_installed) return;
++        _installed = true;
++        try
++        {
++            Application.logMessageReceivedThreaded -= OnLog;
++            Application.logMessageReceivedThreaded += OnLog;
++        }
++        catch { /* ignore */ }
++    }
++
++    private static void OnLog(string condition, string stackTrace, LogType type)
++    {
++        try
++        {
++            var line = $"[{type}] {condition}";
++            if (type == LogType.Exception) line += " " + stackTrace;
++            SafeWrite(line);
++        }
++        catch { /* ignore */ }
++    }
++
++    private static void SafeWrite(string line)
++    {
++        try
++        {
++            var path = FileLog.PathFor(CaptureFile);
++            FileLog.AppendRaw(path, line);
++        }
++        catch { /* ignore */ }
++    }
++}
