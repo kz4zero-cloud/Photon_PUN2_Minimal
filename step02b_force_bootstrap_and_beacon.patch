@@ -1,0 +1,136 @@
+diff --git a/Assets/Scripts/Net/GameFlow2/BootstrapShimLoader.cs b/Assets/Scripts/Net/GameFlow2/BootstrapShimLoader.cs
+new file mode 100644
+index 0000000..a1b2c3d
+--- /dev/null
++++ b/Assets/Scripts/Net/GameFlow2/BootstrapShimLoader.cs
+@@ -0,0 +1,132 @@
++using System.IO;
++using UnityEngine;
++using Photon.Pun;
++
++// 正しい名前空間: Net.GameFlow2
++namespace Net.GameFlow2
++{
++    /// <summary>
++    /// 起動直後に「安定したステージング面」を必ず用意する。
++    /// - DontDestroyOnLoad("GameFlow") を生成
++    /// - PunStagingFlow_Shim と LoadingShellAutoLoader を必ずアタッチ
++    /// - PhotonNetwork.AutomaticallySyncScene を ON
++    /// - Console/HUD を使わず、起動証跡をファイル出力（persistentDataPath/staging_beacon.log）
++    /// </summary>
++    public static class BootstrapShimLoader
++    {
++        private const string SURFACE_NAME = "GameFlow";
++        private const string BEACON_FILE = "staging_beacon.log";
++
++        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
++        private static void EnsureStableSurface()
++        {
++            // 1) シーン同期を必ずON
++            PhotonNetwork.AutomaticallySyncScene = true;
++
++            // 2) 常駐の"GameFlow"を確保
++            var surface = GameObject.Find(SURFACE_NAME);
++            if (surface == null)
++            {
++                surface = new GameObject(SURFACE_NAME);
++                Object.DontDestroyOnLoad(surface);
++            }
++
++            // 3) PunStagingFlow_Shim を確実に載せる
++            if (Object.FindObjectOfType<PunStagingFlow_Shim>() == null)
++            {
++                if (surface.GetComponent<PunStagingFlow_Shim>() == null)
++                    surface.AddComponent<PunStagingFlow_Shim>();
++            }
++
++            // 4) LoadingShellAutoLoader も確実に載せる
++            if (Object.FindObjectOfType<LoadingShellAutoLoader>() == null)
++            {
++                if (surface.GetComponent<LoadingShellAutoLoader>() == null)
++                    surface.AddComponent<LoadingShellAutoLoader>();
++            }
++
++            // 5) 起動ビーコン（ファイル）出力：Console/HUDなしで起動確認できるように
++            try
++            {
++                var path = Path.Combine(Application.persistentDataPath, BEACON_FILE);
++                File.AppendAllText(path, System.DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") +
++                                         " :: BootstrapShimLoader.EnsureStableSurface()\n");
++            }
++            catch { /* 失敗しても動作は継続 */ }
++        }
++    }
++}
+diff --git a/Assets/Scripts/Net/GameFlow2/LoadingShellAutoLoader.cs b/Assets/Scripts/Net/GameFlow2/LoadingShellAutoLoader.cs
+new file mode 100644
+index 0000000..c0ffee1
+--- /dev/null
++++ b/Assets/Scripts/Net/GameFlow2/LoadingShellAutoLoader.cs
+@@ -0,0 +1,60 @@
++using UnityEngine;
++using UnityEngine.SceneManagement;
++
++namespace Net.GameFlow2
++{
++    /// <summary>
++    /// LoadingShell に入ったら、次のステージへ進めるための最小オートローダ（詳細ロジックは既存のまま）。
++    /// ここでは「常駐化」だけを担保。
++    /// </summary>
++    public sealed class LoadingShellAutoLoader : MonoBehaviour
++    {
++        private void OnEnable()
++        {
++            // 必要に応じて sceneLoaded にフック（重複防止のため一旦解除→追加）
++            SceneManager.sceneLoaded -= OnSceneLoaded;
++            SceneManager.sceneLoaded += OnSceneLoaded;
++        }
++
++        private void OnDisable()
++        {
++            SceneManager.sceneLoaded -= OnSceneLoaded;
++        }
++
++        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
++        {
++            // ここでは「LoadingShell到達の検知」だけを担当（詳細な遷移は既存の仕組みに委譲）
++            if (scene.name == "LoadingShell")
++            {
++                // 以降の進行はPunStagingFlow_Shim側の既存ロジックが拾う想定
++            }
++        }
++    }
++}
+diff --git a/Assets/Scripts/Net/Guards/LobbyGuardAutoFix.cs b/Assets/Scripts/Net/Guards/LobbyGuardAutoFix.cs
+new file mode 100644
+index 0000000..d00d00d
+--- /dev/null
++++ b/Assets/Scripts/Net/Guards/LobbyGuardAutoFix.cs
+@@ -0,0 +1,48 @@
++using UnityEngine;
++using UnityEngine.SceneManagement;
++
++/// <summary>
++/// InRoom のまま Lobby に戻される事故を抑止するため、
++/// シーンロードごとに LobbyWhileInRoomGuard.autoFix を true に保つ。
++/// （Console/HUDは使わない）
++/// </summary>
++public sealed class LobbyGuardAutoFix : MonoBehaviour
++{
++    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
++    private static void Hook()
++    {
++        SceneManager.sceneLoaded -= Apply;
++        SceneManager.sceneLoaded += Apply;
++        Apply(default, LoadSceneMode.Single);
++    }
++
++    private static void Apply(UnityEngine.SceneManagement.Scene _, LoadSceneMode __)
++    {
++        var guards = Object.FindObjectsOfType<LobbyWhileInRoomGuard>();
++        foreach (var g in guards)
++        {
++            if (!g.autoFix) g.autoFix = true;
++        }
++    }
++}
