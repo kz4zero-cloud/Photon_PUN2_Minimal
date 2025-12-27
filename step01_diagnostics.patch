@@ -1,0 +1,59 @@
+diff --git a/Assets/Scripts/Net/Debug/PunDiagLogger.cs b/Assets/Scripts/Net/Debug/PunDiagLogger.cs
+index a1b2c3d..d4e5f6a 100644
+--- a/Assets/Scripts/Net/Debug/PunDiagLogger.cs
++++ b/Assets/Scripts/Net/Debug/PunDiagLogger.cs
+@@
+-/// <summary>
+-/// （省略：クラス説明）
+-/// </summary>
+-public class PunDiagLogger : MonoBehaviourPunCallbacks
++/// <summary>
++/// Photon のライフサイクルと Room/Player プロパティを横断で記録する常駐ロガー
++/// </summary>
++[DefaultExecutionOrder(-1000)]
++public class PunDiagLogger : MonoBehaviourPunCallbacks
+ {
+-    // 起動時に 1 度だけシーンに生成
+-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+-    private static void Bootstrap()
+-    {
+-        if (FindObjectOfType<PunDiagLogger>() != null) return;
+-        var go = new GameObject("PunDiagLogger");
+-        Object.DontDestroyOnLoad(go);
+-        go.AddComponent<PunDiagLogger>();
+-        Debug.Log("[Diag] PunDiagLogger bootstrap");
+-    }
++    // Domain Reload 無効時にも確実に初期化されるようフラグ管理
++    private static bool s_initialized;
++
++    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
++    private static void ResetInitFlag() => s_initialized = false;
++
++    // 可能な限り早いタイミングで一度だけ生成
++    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
++    private static void Bootstrap()
++    {
++        if (s_initialized) return;
++        if (FindObjectOfType<PunDiagLogger>() != null) { s_initialized = true; return; }
++        var go = new GameObject("PunDiagLogger");
++        DontDestroyOnLoad(go);
++        go.AddComponent<PunDiagLogger>();
++        s_initialized = true;
++        Debug.Log("[Diag] PunDiagLogger bootstrap (BeforeSceneLoad)");
++    }
+@@
+     private void Awake()
+     {
+         var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+-        Debug.Log($"[Diag] Awake scene={scene}");
++        Debug.Log($"[Diag] Awake scene={scene}");
+     }
+@@
+     private void OnEnable()
+     {
+         var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+-        Debug.Log($"[Diag] OnEnable scene={scene} inRoom={PhotonNetwork.InRoom} autoSync={PhotonNetwork.AutomaticallySyncScene}");
++        Debug.Log($"[Diag] OnEnable scene={scene} inRoom={PhotonNetwork.InRoom} autoSync={PhotonNetwork.AutomaticallySyncScene}");
+         var flow = FindObjectOfType<PunStagingFlow>();
+         Debug.Log($"[Diag] PunStagingFlow in scene = {(flow != null ? "YES" : "NO")}");
+     }
